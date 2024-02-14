@@ -3,8 +3,10 @@ from wtforms import StringField, SubmitField, IntegerField, BooleanField
 from wtforms.validators import DataRequired, Optional, Length
 from wtforms.widgets import Input
 
+
 class ButtonField(BooleanField):
-    widget = Input(input_type='button')
+    widget = Input(input_type="button")
+
 
 class video(FlaskForm):
     user = StringField("Username", [DataRequired()])

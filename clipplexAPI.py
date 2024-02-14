@@ -9,6 +9,7 @@ import requests
 
 MEDIA_STATIC_PATH = "app/static/media"
 
+
 class PlexInfo:
     def __init__(self, username):
         self.plex_url = os.environ.get("PLEX_URL")
@@ -24,7 +25,9 @@ class PlexInfo:
         self.media_type = self._get_file_type()
         self.media_title = self._get_file_title()
         self.current_media_time_int = self._get_current_media_time()
-        self.current_media_time_str = Utils(offset=self.current_media_time_int).offset_to_time
+        self.current_media_time_str = Utils(
+            offset=self.current_media_time_int
+        ).offset_to_time
 
     def _get_media_fps(self) -> float:
         """Get the frame rate of the video currently played by the user.
@@ -32,7 +35,9 @@ class PlexInfo:
         Returns:
             float: Frame Rate of the video
         """
-        media_dict = list(list(list(list(list(self.media_path_xml)[0]))[0])[0])[0].attrib
+        media_dict = list(list(list(list(list(self.media_path_xml)[0]))[0])[0])[
+            0
+        ].attrib
         return float(media_dict["frameRate"])
 
     def _get_current_media_time(self) -> int:
@@ -60,7 +65,9 @@ class PlexInfo:
         Returns:
             str: Path of the video being played
         """
-        media_dict = list(list(list(list(self.media_path_xml)[0]))[0])[0].attrib # REPLACE THAT BY A FIND PART TAG
+        media_dict = list(list(list(list(self.media_path_xml)[0]))[0])[
+            0
+        ].attrib  # REPLACE THAT BY A FIND PART TAG
         return media_dict["file"]
 
     def _get_file_title(self) -> str:
@@ -85,7 +92,7 @@ class PlexInfo:
             str: File type of the video being played
         """
         video_dict = list(list(self.media_path_xml))[0].attrib
-        return video_dict["type"]        
+        return video_dict["type"]
 
     def _get_media_path_xml(self) -> ET:
         """Get the XML from plex for the current user session.
@@ -130,7 +137,10 @@ class Snapshot:
 
     def _download_frames(self):
         cmd = f"ffmpeg -ss {self.time} -i {self.media_path} -vframes {self.fps} -qscale:v 2 {MEDIA_STATIC_PATH}/images/{self.time.replace(':','_')}_%03d.jpg"
-        a = subprocess.call(cmd, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        a = subprocess.call(
+            cmd, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL
+        )
+
 
 class Video:
     def __init__(self, plex_data: PlexInfo, time: str, duration, file_name: str):
@@ -154,25 +164,29 @@ class Video:
 
     def extract_video(self):
         (
-            ffmpeg
-            .input(self.media_path, ss=self.time, t=self.duration)
-            .output(f"{MEDIA_STATIC_PATH}/videos/{self.file_name}.mp4", 
-                    map_metadata=-1, 
-                    vcodec="libx264", 
-                    acodec="libvorbis", 
-                    pix_fmt="yuv420p", 
-                    crf=18, 
-                    **{"metadata:g:0":f"title={self.metadata_title}", 
-                    "metadata:g:1":f"season_number={self.metadata_season}", 
-                    "metadata:g:2":f"show={self.metadata_showname}",
-                    "metadata:g:3":f"episode_id={self.metadata_episode_number}",
-                    "metadata:g:4":f"comment={self.metadata_current_media_time}",
-                    "metadata:g:5":f"artist={self.metadata_username}"})
+            ffmpeg.input(self.media_path, ss=self.time, t=self.duration)
+            .output(
+                f"{MEDIA_STATIC_PATH}/videos/{self.file_name}.mp4",
+                map_metadata=-1,
+                vcodec="libx264",
+                acodec="libvorbis",
+                pix_fmt="yuv420p",
+                crf=18,
+                **{
+                    "metadata:g:0": f"title={self.metadata_title}",
+                    "metadata:g:1": f"season_number={self.metadata_season}",
+                    "metadata:g:2": f"show={self.metadata_showname}",
+                    "metadata:g:3": f"episode_id={self.metadata_episode_number}",
+                    "metadata:g:4": f"comment={self.metadata_current_media_time}",
+                    "metadata:g:5": f"artist={self.metadata_username}",
+                },
+            )
             .run(capture_stdout=True)
         )
 
+
 class Utils:
-    def __init__(self, offset: int=0):
+    def __init__(self, offset: int = 0):
         self.offset_to_time = self.milli_to_string(offset)
 
     def milli_to_string(self, millisec: int) -> str:
@@ -190,12 +204,14 @@ class Utils:
         if len(str(time)) < 2:
             time = f"0{time}"
         return time
-    
+
     def calculate_clip_time(self, start, end) -> int:
         start = start.split(":")
-        start_total_sec = (int(start[0])*3600) + (int(start[1])*60) + (int(start[2]))
+        start_total_sec = (
+            (int(start[0]) * 3600) + (int(start[1]) * 60) + (int(start[2]))
+        )
         end = end.split(":")
-        end_total_sec = (int(end[0])*3600) + (int(end[1])*60) + (int(end[2]))
+        end_total_sec = (int(end[0]) * 3600) + (int(end[1]) * 60) + (int(end[2]))
         total_second = end_total_sec - start_total_sec
         return total_second
 
@@ -204,7 +220,9 @@ class Utils:
         folder_list = []
         for a in os.listdir(folder):
             a = f"{folder}/{a}"
-            folder_list.append(f"{a.split('/')[-4]}/{a.split('/')[-3]}/{a.split('/')[-2]}/{a.split('/')[-1]}")
+            folder_list.append(
+                f"{a.split('/')[-4]}/{a.split('/')[-3]}/{a.split('/')[-2]}/{a.split('/')[-1]}"
+            )
         return sorted(folder_list)
 
     def get_videos_in_folder() -> list:
@@ -238,9 +256,11 @@ class Utils:
         email = os.environ.get("STREAMABLE_LOGIN") or ""
         password = os.environ.get("STREAMABLE_PASSWORD") or ""
         try:
-            response = requests.post("https://api.streamable.com/upload", auth=(email, password), files=file_processed).json()
+            response = requests.post(
+                "https://api.streamable.com/upload",
+                auth=(email, password),
+                files=file_processed,
+            ).json()
             return response
         except Exception as e:
             raise Exception(f"Problem uploading to streamable: {e}")
-
-
