@@ -1,8 +1,8 @@
-import time
-from flask import render_template, redirect, request, jsonify
 from app import app
 from app.forms import video as formVideo
+from flask import render_template, redirect, request, jsonify
 import clipplexAPI
+import time
 
 
 @app.route("/")
