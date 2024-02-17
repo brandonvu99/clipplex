@@ -96,7 +96,7 @@
         </tr>
       </table>
     -->
-      <button type='button' onclick='createVideo()' id='create_video_btn' class='create_video'>Create video</button>
+      <button type='button' onclick='video_create()' id='video_create_btn' class='video_create'>Create video</button>
     </p>
     </form>
 
@@ -164,7 +164,7 @@
     }
   }
   $(".extraVideoDetails").hide();
-  function createVideo(){
+  function video_create(){
     var username = document.getElementById("username_input").value
     var start_hour = document.getElementById("start_hour").value
     var start_minute = document.getElementById("start_minute").value
@@ -173,7 +173,7 @@
     var end_minute = document.getElementById("end_minute").value
     var end_second = document.getElementById("end_second").value
     const Http = new XMLHttpRequest();
-    const url="/create_video?username="+username+"&start_hour="+start_hour+"&start_minute="+start_minute+"&start_second="+start_second+"&end_hour="+end_hour+"&end_minute="+end_minute+"&end_second="+end_second
+    const url="/api/video?username="+username+"&start_hour="+start_hour+"&start_minute="+start_minute+"&start_second="+start_second+"&end_hour="+end_hour+"&end_minute="+end_minute+"&end_second="+end_second
     Http.open("POST", url, true)
     $('#layoutSidenav').css({'filter': 'blur(8px)', '-webkit-filter': 'blur(8px)'})
     $('body').append('<div style="" id="loadingDiv"><div class="loader"></div><div class="loaderSecondLine">Creating video...</div></div>');

@@ -22,8 +22,8 @@ def home():
     return redirect("/instant_video.html")
 
 
-@flaskapp.route("/create_video", methods=["POST"])
-def create_video():
+@flaskapp.route("/api/video", methods=["POST"])
+def video_create():
     args = request.args
     username = args.get("username")
     start_hour = args.get("start_hour")
