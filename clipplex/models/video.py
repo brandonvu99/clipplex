@@ -1,3 +1,7 @@
+from config import MEDIA_STATIC_PATH
+from models.plex import PlexInfo
+import ffmpeg
+
 
 class Video:
     def __init__(self, plex_data: PlexInfo, time: str, duration, file_name: str):

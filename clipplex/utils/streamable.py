@@ -1,3 +1,6 @@
+import os
+import requests
+
 
 def streamable_upload(self, file_path) -> str:
     file_processed = {

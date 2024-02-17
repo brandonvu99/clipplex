@@ -1,3 +1,8 @@
+from utils.timing import milli_to_string
+import os
+import xml.etree.ElementTree as ET
+import requests
+
 
 class PlexInfo:
     def __init__(self, username):
@@ -14,9 +19,7 @@ class PlexInfo:
         self.media_type = self._get_file_type()
         self.media_title = self._get_file_title()
         self.current_media_time_int = self._get_current_media_time()
-        self.current_media_time_str = Utils(
-            offset=self.current_media_time_int
-        ).offset_to_time
+        self.current_media_time_str = milli_to_string(self.current_media_time_int)
 
     def _get_media_fps(self) -> float:
         """Get the frame rate of the video currently played by the user.
@@ -116,4 +119,3 @@ class PlexInfo:
                 if session.tag == "User" and session.attrib["title"] == username:
                     return list(self.sessions_xml).index(sessions)
         raise Exception(f"No stream running for user {username}")
-

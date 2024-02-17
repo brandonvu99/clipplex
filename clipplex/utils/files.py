@@ -1,3 +1,8 @@
+from config import MEDIA_STATIC_PATH
+import ffmpeg
+import os
+
+
 def get_images_in_folder() -> list:
     folder = os.path.join(MEDIA_STATIC_PATH, "images")
     folder_list = []
@@ -7,6 +12,7 @@ def get_images_in_folder() -> list:
             f"{a.split('/')[-4]}/{a.split('/')[-3]}/{a.split('/')[-2]}/{a.split('/')[-1]}"
         )
     return sorted(folder_list)
+
 
 def get_videos_in_folder() -> list:
     folder = os.path.join(MEDIA_STATIC_PATH, "videos")
@@ -24,6 +30,7 @@ def get_videos_in_folder() -> list:
         file_dict["season_number"] = metadata.get("season_number") or ""
         folder_list.append(file_dict)
     return folder_list
+
 
 def delete_file(self, file_path) -> bool:
     try:

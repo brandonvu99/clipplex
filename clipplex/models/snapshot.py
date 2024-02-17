@@ -1,3 +1,6 @@
+from config import MEDIA_STATIC_PATH
+import subprocess
+
 
 class Snapshot:
     def __init__(self, media_path: str, time: str, fps: float):
