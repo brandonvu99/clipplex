@@ -1,6 +1,6 @@
+from __future__ import annotations
 from clipplex.config import MEDIA_PATH
 from clipplex.models.plex import PlexInfo
-from __future__ import annotations
 from pathlib import Path
 import ffmpeg
 
