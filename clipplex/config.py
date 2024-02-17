@@ -1,11 +1,11 @@
 from pathlib import Path
 import os
 
-MEDIA_DIR_PATH: Path = Path("app/static/media")
-IMAGES_DIR_PATH: Path = MEDIA_DIR_PATH / "images"
-VIDEOS_DIR_PATH: Path = MEDIA_DIR_PATH / "videos"
+MEDIA_DIRPATH: Path = Path("app/static/media")
+IMAGES_DIRPATH: Path = MEDIA_DIRPATH / "images"
+VIDEOS_DIRPATH: Path = MEDIA_DIRPATH / "videos"
 
-PLEX_DIR_PATH_TO_CLIPPLEX_DIR_PATH: dict[Path, Path] = {
+PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH: dict[Path, Path] = {
     Path(r"E:/Media/") : Path(r"/Media")
 }
 
