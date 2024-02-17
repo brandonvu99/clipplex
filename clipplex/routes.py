@@ -1,7 +1,13 @@
-from clipplex.forms import video as formVideo
+from forms import video as formVideo
 from flask import Flask
 from flask import render_template, redirect, request, jsonify
-import clipplex.clipplex.models.clipplexAPI as clipplexAPI
+from utils import timing
+from models.plex import PlexInfo
+from models.snapshot import Snapshot
+from models.video import Video
+from utils.files import delete_file, get_images_in_folder, get_videos_in_folder
+from utils.streamable import streamable_upload
+from utils.timing import add_time
 import time
 
 flaskapp = Flask(__name__, static_url_path="/static")
@@ -16,23 +22,22 @@ def home():
 @flaskapp.route("/create_video", methods=["POST"])
 def create_video():
     args = request.args
-    _pad_time = clipplexAPI.Utils()._pad_time
-    start = f"{_pad_time(args.get('start_hour'))}:{_pad_time(args.get('start_minute'))}:{_pad_time(args.get('start_second'))}"
-    end = f"{_pad_time(args.get('end_hour'))}:{_pad_time(args.get('end_minute'))}:{_pad_time(args.get('end_second'))}"
+    start = f"{timing._pad_time(args.get('start_hour'))}:{timing._pad_time(args.get('start_minute'))}:{timing._pad_time(args.get('start_second'))}"
+    end = f"{timing._pad_time(args.get('end_hour'))}:{timing._pad_time(args.get('end_minute'))}:{timing._pad_time(args.get('end_second'))}"
     result = get_instant_video(args.get("username"), start, end)
     return jsonify(result)
 
 
 def get_instant_video(username, start, end):
-    plex_data = clipplexAPI.PlexInfo(username)
-    clip_time = clipplexAPI.Utils().calculate_clip_time(start, end)
+    plex_data = PlexInfo(username)
+    clip_time = timing.calculate_clip_time(start, end)
     media_name = plex_data.media_title.replace(" ", "")
     file_name = f"{username}_{media_name}_{int(time.time())}"
     current_media_time = plex_data.current_media_time_str
     print(
         f"Creating video of {clip_time} seconds starting at {start} for user {username} for file {plex_data.media_path}"
     )
-    video = clipplexAPI.Video(plex_data, start, clip_time, file_name)
+    video = Video(plex_data, start, clip_time, file_name)
     video.extract_video()
     return {"result": "success"}
 
@@ -41,7 +46,7 @@ def get_instant_video(username, start, end):
 def get_current_stream():
     username = request.args.get("username")
     try:
-        plex = clipplexAPI.PlexInfo(username)
+        plex = PlexInfo(username)
     except:
         return {"message": f"No session running for user {username}"}
     return {
@@ -54,8 +59,8 @@ def get_current_stream():
 
 @flaskapp.route("/get_instant_snapshot", methods=["GET"])
 def get_instant_snapshot():
-    plex_data = clipplexAPI.PlexInfo("jonike")  # DEBUG
-    snapshot = clipplexAPI.Snapshot(
+    plex_data = PlexInfo("jonike")  # DEBUG
+    snapshot = Snapshot(
         plex_data.media_path, plex_data.current_media_time_str, plex_data.media_fps
     )
     snapshot._download_frames()
@@ -67,7 +72,7 @@ def instant_snapshot():
     return render_template(
         "instant_snapshot.html",
         title="Instant Snapshot",
-        images=clipplexAPI.Utils.get_images_in_folder(),
+        images=get_images_in_folder(),
     )
 
 
@@ -78,7 +83,7 @@ def timed_video():
         "instant_video.html",
         form=form,
         title="Instant Video",
-        videos=clipplexAPI.Utils.get_videos_in_folder(),
+        videos=get_videos_in_folder(),
     )
 
 
@@ -91,14 +96,14 @@ def login():
 def quick_add_time_to_start_time():
     start_time = request.args.get("start_time")
     time_to_add = int(request.args.get("time_to_add"))
-    return clipplexAPI.Utils().add_time(start_time, time_to_add)
+    return add_time(start_time, time_to_add)
 
 
 @flaskapp.route("/remove_file", methods=["POST"])
 # @login_required
 def remove_file():
     video_path = request.args.get("file_path")
-    if clipplexAPI.Utils().delete_file(video_path):
+    if delete_file(video_path):
         return redirect("/instant_video.html")
     else:
         return "Problem downloading the file"
@@ -120,8 +125,12 @@ def check_credentials(token=None):
         return True, plex_login[0], plex_login[1]
 
 
+def plex_user_login():
+    raise NotImplemented("TODO(please implement this)")
+
+
 @flaskapp.route("/streamable_upload", methods=["POST"])
 def streamable_upload():
     file_path = request.args.get("file_path")
-    upload = clipplexAPI.Utils().streamable_upload(file_path)
+    upload = streamable_upload(file_path)
     return upload
