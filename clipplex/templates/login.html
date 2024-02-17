@@ -60,7 +60,7 @@
         data = $.extend(data, x_plex_headers);
         console.log(data)
         $.ajax({
-            url: '/signin',
+            url: '/api/signin',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),

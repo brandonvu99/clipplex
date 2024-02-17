@@ -18,12 +18,12 @@ flaskapp.config["SECRET_KEY"] = "524t098wruigofjvncx98uwroeiyhfjdk"
 
 
 @flaskapp.route("/")
-def home():
+def render_home():
     return redirect("/instant_video.html")
 
 
 @flaskapp.route("/instant_video.html", methods=["GET"])
-def instant_video():
+def render_instant_video():
     return render_template(
         "instant_video.html",
         form=VideoForm(),
@@ -33,8 +33,17 @@ def instant_video():
 
 
 @flaskapp.route("/login.html", methods=["GET", "POST"])
-def login():
+def render_login():
     return render_template("login.html")
+
+
+@flaskapp.route("/snapshot.html", methods=["GET"])
+def render_snapshot():
+    return render_template(
+        "instant_snapshot.html",
+        title="Instant Snapshot",
+        images=get_images(),
+    )
 
 
 @flaskapp.route("/api/videos", methods=["POST"])
@@ -70,14 +79,18 @@ def get_instant_video(username: str, start: timedelta, end: timedelta):
     return {"result": "success"}
 
 
-@flaskapp.route("/api/streams", methods=["GET"])
+@flaskapp.route("/api/videos", methods=["DELETE"])
+# @login_required
+def video_delete():
+    video_path = request.args.get("file_path")
+    if delete_file(video_path):
+        return redirect("/instant_video.html")
+    else:
+        return "Problem deleting the file"
 
-@flaskapp.route("/api/streams/<username>")
-def get_stream(username):
-    return PlexInfo(username).to_stream_info()
 
-@flaskapp.route("/get_instant_snapshot", methods=["GET"])
-def get_instant_snapshot():
+@flaskapp.route("/api/snapshots", methods=["GET"])
+def snapshot_create():
     plex_data = PlexInfo("jonike")  # DEBUG
     snapshot = Snapshot(
         plex_data.media_path, plex_data.current_media_time_str, plex_data.media_fps
@@ -86,15 +99,13 @@ def get_instant_snapshot():
     return "Files downloaded"
 
 
-@flaskapp.route("/instant_snapshot.html", methods=["GET"])
-def instant_snapshot():
-    return render_template(
-        "instant_snapshot.html",
-        title="Instant Snapshot",
-        images=get_images(),
-    )
+@flaskapp.route("/api/streams", methods=["GET"])
+@flaskapp.route("/api/streams/<username>")
+def stream_get(username):
+    return PlexInfo(username).to_stream_info()
 
 
+# TODO(make this a client side function or create a util api)
 @flaskapp.route("/quick_add_time_to_start_time", methods=["POST"])
 def quick_add_time_to_start_time():
     start_time = request.args.get("start_time")
@@ -102,17 +113,7 @@ def quick_add_time_to_start_time():
     return add_time(start_time, time_to_add)
 
 
-@flaskapp.route("/remove_file", methods=["POST"])
-# @login_required
-def remove_file():
-    video_path = request.args.get("file_path")
-    if delete_file(video_path):
-        return redirect("/instant_video.html")
-    else:
-        return "Problem downloading the file"
-
-
-@flaskapp.route("/signin", methods=["POST"])
+@flaskapp.route("/api/signin", methods=["POST"])
 def signin():
     token = request.get_json()["token"]
     valid_login, user_details, user_group = check_credentials(token=token)
@@ -132,7 +133,7 @@ def plex_user_login():
     raise NotImplemented("TODO(please implement this)")
 
 
-@flaskapp.route("/streamable_upload", methods=["POST"])
+@flaskapp.route("/api/streamable", methods=["POST"])
 def streamable_upload():
     file_path = request.args.get("file_path")
     upload = streamable_upload(file_path)

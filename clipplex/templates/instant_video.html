@@ -207,7 +207,7 @@
   }
   function upload_streamable(file){
     const Http = new XMLHttpRequest();
-    const url='/streamable_upload?file_path='+file;
+    const url='/api/streamable?file_path='+file;
     Http.open("POST", url, true);
     $('#layoutSidenav').css({'filter': 'blur(8px)', '-webkit-filter': 'blur(8px)'})
     $('body').append('<div style="" id="loadingDiv"><div class="loader"></div><div class="loaderSecondLine">Uploading video...</div></div>');
