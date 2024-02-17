@@ -1,5 +1,5 @@
 from __future__ import annotations
-from clipplex.config import MEDIA_PATH
+from clipplex.config import MEDIA_DIR_PATH
 from clipplex.models.plex import PlexInfo
 from pathlib import Path
 import ffmpeg
@@ -29,7 +29,7 @@ class Video:
         (
             ffmpeg.input(self.media_path, ss=self.time, t=self.duration)
             .output(
-                f"{MEDIA_PATH}/videos/{self.file_name}.mp4",
+                f"{MEDIA_DIR_PATH}/videos/{self.file_name}.mp4",
                 map_metadata=-1,
                 vcodec="libx264",
                 acodec="libvorbis",
