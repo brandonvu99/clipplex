@@ -8,7 +8,7 @@ class ButtonField(BooleanField):
     widget = Input(input_type="button")
 
 
-class video(FlaskForm):
+class videoForm(FlaskForm):
     user = StringField("Username", [DataRequired()])
     start_time_hour = StringField([Length(min=2, max=2)])
     start_time_minute = StringField([Length(min=2, max=2)])
