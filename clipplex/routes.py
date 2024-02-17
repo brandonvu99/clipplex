@@ -5,7 +5,7 @@ from clipplex.models.video import Video
 from clipplex.utils import timing
 from clipplex.utils.files import delete_file, get_images, get_instant_videos
 from clipplex.utils.streamable import streamable_upload
-from clipplex.utils.timing import add_time
+from clipplex.utils.timing import add_time, create_timestamp_str
 from flask import Flask
 from flask import render_template, redirect, request, jsonify
 import time
@@ -22,9 +22,17 @@ def home():
 @flaskapp.route("/create_video", methods=["POST"])
 def create_video():
     args = request.args
-    start = f"{timing._pad_time(args.get('start_hour'))}:{timing._pad_time(args.get('start_minute'))}:{timing._pad_time(args.get('start_second'))}"
-    end = f"{timing._pad_time(args.get('end_hour'))}:{timing._pad_time(args.get('end_minute'))}:{timing._pad_time(args.get('end_second'))}"
-    result = get_instant_video(args.get("username"), start, end)
+    username = args.get("username")
+    start_hour = args.get('start_hour')
+    start_minute = args.get('start_minute')
+    start_second = args.get('start_second')
+    end_hour = args.get('end_hour')
+    end_minute = args.get('end_minute')
+    end_second = args.get('end_second')
+
+    start_timestamp = create_timestamp_str(start_hour, start_minute, start_second)
+    end_timestamp = create_timestamp_str(end_hour, end_minute, end_second)
+    result = get_instant_video(username, start_timestamp, end_timestamp)
     return jsonify(result)
 
 

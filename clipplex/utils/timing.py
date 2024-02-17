@@ -19,6 +19,9 @@ def _pad_time(time) -> str:
         time = f"0{time}"
     return time
 
+def create_timestamp_str(hour: int, minute: int, second: int) -> str:
+    return f"{hour:02d}:{minute:02d}:{second:02d}"
+
 
 def calculate_clip_time(start, end) -> int:
     start = start.split(":")
