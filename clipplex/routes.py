@@ -3,7 +3,7 @@ from clipplex.models.plex import PlexInfo
 from clipplex.models.snapshot import Snapshot
 from clipplex.models.video import Video
 from clipplex.utils import timing
-from clipplex.utils.files import delete_file, get_images, get_instant_videos
+from clipplex.utils.files import delete_file, get_images, get_videos
 from clipplex.utils.streamable import streamable_upload
 from clipplex.utils.timing import add_time, timestamp_str_of
 from datetime import timedelta
@@ -19,16 +19,16 @@ flaskapp.config["SECRET_KEY"] = "524t098wruigofjvncx98uwroeiyhfjdk"
 
 @flaskapp.route("/")
 def render_home():
-    return redirect("/instant_video.html")
+    return redirect("/video.html")
 
 
-@flaskapp.route("/instant_video.html", methods=["GET"])
-def render_instant_video():
+@flaskapp.route("/video.html", methods=["GET"])
+def render_video():
     return render_template(
-        "instant_video.html",
+        "video.html",
         form=VideoForm(),
-        title="Instant Video",
-        videos=get_instant_videos(),
+        title="Videos",
+        videos=get_videos(),
     )
 
 
@@ -40,8 +40,8 @@ def render_login():
 @flaskapp.route("/snapshot.html", methods=["GET"])
 def render_snapshot():
     return render_template(
-        "instant_snapshot.html",
-        title="Instant Snapshot",
+        "snapshot.html",
+        title="Snapshot",
         images=get_images(),
     )
 
@@ -59,11 +59,11 @@ def video_create():
 
     start = timedelta(hours=start_hour, minutes=start_minute, seconds=start_second)
     end = timedelta(hours=end_hour, minutes=end_minute, seconds=end_second)
-    result = get_instant_video(username, start, end)
+    result = get_video(username, start, end)
     return jsonify(result)
 
 
-def get_instant_video(username: str, start: timedelta, end: timedelta):
+def get_video(username: str, start: timedelta, end: timedelta):
     plex_data = PlexInfo(username)
     clip_duration_secs = (start - end).total_seconds()
     media_name = plex_data.media_title.replace(" ", "-")
@@ -84,7 +84,7 @@ def get_instant_video(username: str, start: timedelta, end: timedelta):
 def video_delete():
     video_path = request.args.get("file_path")
     if delete_file(video_path):
-        return redirect("/instant_video.html")
+        return redirect("/video.html")
     else:
         return "Problem deleting the file"
 

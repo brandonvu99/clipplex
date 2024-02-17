@@ -18,7 +18,7 @@ def get_images() -> list[str]:
     ]
 
 
-def get_instant_videos() -> list[dict[str, str]]:
+def get_videos() -> list[dict[str, str]]:
     return [
         Video_.from_filepath(Path(dirpath) / filename).to_dict()
         for dirpath, _, filenames in os.walk(VIDEOS_DIRPATH)
