@@ -1,10 +1,10 @@
-from clipplex.config import MEDIA_STATIC_PATH
+from clipplex.config import MEDIA_PATH, VIDEO_DIR_PATH
 import ffmpeg
 import os
 
 
 def get_images_in_folder() -> list:
-    folder = os.path.join(MEDIA_STATIC_PATH, "images")
+    folder = os.path.join(MEDIA_PATH, "images")
     folder_list = []
     for a in os.listdir(folder):
         a = f"{folder}/{a}"
@@ -14,12 +14,11 @@ def get_images_in_folder() -> list:
     return sorted(folder_list)
 
 
-def get_videos_in_folder() -> list:
-    folder = os.path.join(MEDIA_STATIC_PATH, "videos")
+def get_instant_videos() -> list:
     folder_list = []
-    for file in os.listdir(folder):
+    for file in os.listdir(VIDEO_DIR_PATH):
         file_dict = {}
-        file = os.path.join(folder, file)
+        file = os.path.join(VIDEO_DIR_PATH, file)
         metadata = ffmpeg.probe(file)["format"]["tags"]
         file_dict["file_path"] = "/".join(file.split("/")[1:])
         file_dict["title"] = metadata.get("title") or ""

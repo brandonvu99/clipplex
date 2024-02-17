@@ -1,9 +1,9 @@
-from clipplex.forms import video as formVideo
+from clipplex.forms import videoForm
 from clipplex.models.plex import PlexInfo
 from clipplex.models.snapshot import Snapshot
 from clipplex.models.video import Video
 from clipplex.utils import timing
-from clipplex.utils.files import delete_file, get_images_in_folder, get_videos_in_folder
+from clipplex.utils.files import delete_file, get_images_in_folder, get_instant_videos
 from clipplex.utils.streamable import streamable_upload
 from clipplex.utils.timing import add_time
 from flask import Flask
@@ -78,13 +78,12 @@ def instant_snapshot():
 
 
 @flaskapp.route("/instant_video.html", methods=["GET"])
-def timed_video():
-    form = formVideo()
+def instant_video():
     return render_template(
         "instant_video.html",
-        form=form,
+        form=videoForm(),
         title="Instant Video",
-        videos=get_videos_in_folder(),
+        videos=get_instant_videos(),
     )
 
 
