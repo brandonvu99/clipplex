@@ -22,6 +22,21 @@ def home():
     return redirect("/instant_video.html")
 
 
+@flaskapp.route("/instant_video.html", methods=["GET"])
+def instant_video():
+    return render_template(
+        "instant_video.html",
+        form=VideoForm(),
+        title="Instant Video",
+        videos=get_instant_videos(),
+    )
+
+
+@flaskapp.route("/login.html", methods=["GET", "POST"])
+def login():
+    return render_template("login.html")
+
+
 @flaskapp.route("/api/videos", methods=["POST"])
 def video_create():
     args = request.args
@@ -78,21 +93,6 @@ def instant_snapshot():
         title="Instant Snapshot",
         images=get_images(),
     )
-
-
-@flaskapp.route("/instant_video.html", methods=["GET"])
-def instant_video():
-    return render_template(
-        "instant_video.html",
-        form=VideoForm(),
-        title="Instant Video",
-        videos=get_instant_videos(),
-    )
-
-
-@flaskapp.route("/login.html", methods=["GET", "POST"])
-def login():
-    return render_template("login.html")
 
 
 @flaskapp.route("/quick_add_time_to_start_time", methods=["POST"])
