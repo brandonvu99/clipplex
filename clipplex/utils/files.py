@@ -1,10 +1,10 @@
 from clipplex.config import (
     IMAGES_DIRPATH,
-    VIDEOS_DIRPATH,
+    CLIPS_DIRPATH,
     PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH,
 )
 from clipplex.models.image import Image
-from clipplex.models.video import Video_
+from clipplex.models.clip import Clip_
 from pathlib import Path
 import ffmpeg
 import os
@@ -18,10 +18,10 @@ def get_images() -> list[str]:
     ]
 
 
-def get_videos() -> list[dict[str, str]]:
+def get_clips()() -> list[dict[str, str]]:
     return [
-        Video_.from_filepath(Path(dirpath) / filename).to_dict()
-        for dirpath, _, filenames in os.walk(VIDEOS_DIRPATH)
+        Clip_.from_filepath(Path(dirpath) / filename).to_dict()
+        for dirpath, _, filenames in os.walk(CLIPS_DIRPATH)
         for filename in filenames
     ]
 

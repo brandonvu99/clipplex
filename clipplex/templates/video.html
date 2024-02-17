@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1 class="mt-4">Video</h1>
+  <h1 class="mt-4">Clip</h1>
   <p><span id="Info"></span></p>
   <p><span id="Title"></span></p>
   <p><span id="Current_Time"></span></p>
@@ -68,9 +68,9 @@
             Format
           </td>
           <td>
-              <input checked type="checkbox" id="MP4" name="video_format" value="MP4">
+              <input checked type="checkbox" id="MP4" name="clip_format" value="MP4">
               <label for="html">MP4</label>
-              <input type="checkbox" id="GIF" name="video_format" value="GIF">
+              <input type="checkbox" id="GIF" name="clip_format" value="GIF">
               <label for="css">GIF</label><br>
           </td>
         </tr>
@@ -96,19 +96,19 @@
         </tr>
       </table>
     -->
-      <button type='button' onclick='video_create()' id='video_create_btn' class='video_create'>Create video</button>
+      <button type='button' onclick='clip_create()' id='clip_create_btn' class='clip_create'>Create clip</button>
     </p>
     </form>
 
 <table>
-  {% for video in videos %}
-    {% set file_path = video['file_path'] %}
-    {% set title = video['title'] %}
-    {% set original_time = video['original_start_time'] %}
-    {% set creator = video['username'] %}
-    {% set show = video['show'] %}
-    {% set episode = video['episode_number'] %}
-    {% set season = video['season_number'] %}
+  {% for clip in clips %}
+    {% set file_path = clip['file_path'] %}
+    {% set title = clip['title'] %}
+    {% set original_time = clip['original_start_time'] %}
+    {% set creator = clip['username'] %}
+    {% set show = clip['show'] %}
+    {% set episode = clip['episode_number'] %}
+    {% set season = clip['season_number'] %}
       <tr>
         <td style="padding-right: 10px;">
           <video width="768" height="432" controls>
@@ -127,7 +127,7 @@
           <i id="{{loop.index}}" class="fas fa-plus-circle" onclick=viewDetails(this.id)></i>
         </td>
       </tr>
-      <tr id="details_{{loop.index}}" class="extraVideoDetails">
+      <tr id="details_{{loop.index}}" class="extraClipDetails">
         <td>
         {% if show|length %}
           <p>
@@ -163,8 +163,8 @@
       $("#details_"+id).show();
     }
   }
-  $(".extraVideoDetails").hide();
-  function video_create(){
+  $(".extraClipDetails").hide();
+  function clip_create(){
     var username = document.getElementById("username_input").value
     var start_hour = document.getElementById("start_hour").value
     var start_minute = document.getElementById("start_minute").value
@@ -173,10 +173,10 @@
     var end_minute = document.getElementById("end_minute").value
     var end_second = document.getElementById("end_second").value
     const Http = new XMLHttpRequest();
-    const url="/api/videos?username="+username+"&start_hour="+start_hour+"&start_minute="+start_minute+"&start_second="+start_second+"&end_hour="+end_hour+"&end_minute="+end_minute+"&end_second="+end_second
+    const url="/api/clips?username="+username+"&start_hour="+start_hour+"&start_minute="+start_minute+"&start_second="+start_second+"&end_hour="+end_hour+"&end_minute="+end_minute+"&end_second="+end_second
     Http.open("POST", url, true)
     $('#layoutSidenav').css({'filter': 'blur(8px)', '-webkit-filter': 'blur(8px)'})
-    $('body').append('<div style="" id="loadingDiv"><div class="loader"></div><div class="loaderSecondLine">Creating video...</div></div>');
+    $('body').append('<div style="" id="loadingDiv"><div class="loader"></div><div class="loaderSecondLine">Creating clip...</div></div>');
     Http.onload = function (e) {
       if (Http.readyState === 4) {
         if (Http.status === 200) {
@@ -185,7 +185,7 @@
         } else {
           $('#loadingDiv').remove()
           $('#layoutSidenav').css({'filter': '', '-webkit-filter': ''})
-          $('#Info').text("Error: Video Creation: "+Http.statusText)
+          $('#Info').text("Error: Clip Creation: "+Http.statusText)
           console.error(Http.statusText);
         }
       }
@@ -210,14 +210,14 @@
     const url='/api/streamable?file_path='+file;
     Http.open("POST", url, true);
     $('#layoutSidenav').css({'filter': 'blur(8px)', '-webkit-filter': 'blur(8px)'})
-    $('body').append('<div style="" id="loadingDiv"><div class="loader"></div><div class="loaderSecondLine">Uploading video...</div></div>');
+    $('body').append('<div style="" id="loadingDiv"><div class="loader"></div><div class="loaderSecondLine">Uploading clip...</div></div>');
     Http.onload = function (e) {
       if (Http.readyState === 4) {
         if (Http.status === 200) {
           const obj = JSON.parse(Http.responseText);
           $('#loadingDiv').remove()
           $('#layoutSidenav').css({'filter': '', '-webkit-filter': ''})
-          $('#Info').text("Video uploaded to Streamable. URL: https://streamable.com/"+obj.shortcode)
+          $('#Info').text("Clip uploaded to Streamable. URL: https://streamable.com/"+obj.shortcode)
         } else {
           console.error(Http.statusText);
           $('#loadingDiv').remove()

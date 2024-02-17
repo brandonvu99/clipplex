@@ -5,7 +5,7 @@ from pathlib import Path
 import ffmpeg
 
 
-class Video:
+class Clip:
     def __init__(self, plex_data: PlexInfo, time: str, duration, file_name: str):
         self.media_path = plex_data.media_path
         plex_attributes = list(list(plex_data.media_path_xml))[0].attrib
@@ -25,7 +25,7 @@ class Video:
         self.duration = duration
         self.file_name = file_name
 
-    def extract_video(self):
+    def create_clip(self):
         (
             ffmpeg.input(self.media_path, ss=self.time, t=self.duration)
             .output(
@@ -48,7 +48,7 @@ class Video:
         )
 
 
-class Video_(object):
+class Clip_(object):
     def __init__(
         self,
         filepath: Path,
@@ -71,9 +71,9 @@ class Video_(object):
         return self.__dict__
 
     @staticmethod
-    def from_filepath(filepath: Path) -> Video_:
+    def from_filepath(filepath: Path) -> Clip_:
         metadata = ffmpeg.probe(filepath)["format"]["tags"]
-        return Video_(
+        return Clip_(
             filepath=filepath.parts[1:],
             title=metadata.get("title") or "",
             original_start_time=metadata.get("comment") or "",

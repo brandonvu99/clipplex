@@ -1,9 +1,9 @@
-from clipplex.forms import VideoForm
+from clipplex.forms import ClipForm
 from clipplex.models.plex import PlexInfo
 from clipplex.models.snapshot import Snapshot
-from clipplex.models.video import Video
+from clipplex.models.clip import Clip
 from clipplex.utils import timing
-from clipplex.utils.files import delete_file, get_images, get_videos
+from clipplex.utils.files import delete_file, get_images, get_clips()
 from clipplex.utils.streamable import streamable_upload
 from clipplex.utils.timing import add_time, timestamp_str_of
 from datetime import timedelta
@@ -19,16 +19,16 @@ flaskapp.config["SECRET_KEY"] = "524t098wruigofjvncx98uwroeiyhfjdk"
 
 @flaskapp.route("/")
 def render_home():
-    return redirect("/video.html")
+    return redirect("/clip.html")
 
 
-@flaskapp.route("/video.html", methods=["GET"])
-def render_video():
+@flaskapp.route("/clip.html", methods=["GET"])
+def render_clip():
     return render_template(
-        "video.html",
-        form=VideoForm(),
-        title="Videos",
-        videos=get_videos(),
+        "clip.html",
+        form=ClipForm(),
+        title="Clips",
+        clips=get_clips(),
     )
 
 
@@ -46,8 +46,8 @@ def render_snapshot():
     )
 
 
-@flaskapp.route("/api/videos", methods=["POST"])
-def video_create():
+@flaskapp.route("/api/clips", methods=["POST"])
+def clip_create():
     args = request.args
     username = args.get("username")
     start_hour = args.get("start_hour")
@@ -59,32 +59,32 @@ def video_create():
 
     start = timedelta(hours=start_hour, minutes=start_minute, seconds=start_second)
     end = timedelta(hours=end_hour, minutes=end_minute, seconds=end_second)
-    result = get_video(username, start, end)
+    result = get_clip(username, start, end)
     return jsonify(result)
 
 
-def get_video(username: str, start: timedelta, end: timedelta):
+def get_clip(username: str, start: timedelta, end: timedelta):
     plex_data = PlexInfo(username)
     clip_duration_secs = (start - end).total_seconds()
     media_name = plex_data.media_title.replace(" ", "-")
-    video_filepath = Path(username) / media_name / f"{int(time.time())}"
+    clip_filepath = Path(username) / media_name / f"{int(time.time())}"
     logging.info(
-        f"Creating video of {clip_duration_secs} seconds starting at {start} for user {username} for file {plex_data.media_path}."
+        f"Creating clip of {clip_duration_secs} seconds starting at {start} for user {username} for file {plex_data.media_path}."
     )
-    video = Video(plex_data, start, clip_duration_secs, video_filepath)
-    video.extract_video()
+    clip = Clip(plex_data, start, clip_duration_secs, clip_filepath)
+    clip.create_clip()
     logging.info(
-        f"Created video of {clip_duration_secs} seconds starting at {start} for user {username} for file {plex_data.media_path}."
+        f"Created clip of {clip_duration_secs} seconds starting at {start} for user {username} for file {plex_data.media_path}."
     )
     return {"result": "success"}
 
 
-@flaskapp.route("/api/videos", methods=["DELETE"])
+@flaskapp.route("/api/clips", methods=["DELETE"])
 # @login_required
-def video_delete():
-    video_path = request.args.get("file_path")
-    if delete_file(video_path):
-        return redirect("/video.html")
+def clip_delete():
+    clip_path = request.args.get("file_path")
+    if delete_file(clip_path):
+        return redirect("/clip.html")
     else:
         return "Problem deleting the file"
 
