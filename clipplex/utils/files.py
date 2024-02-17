@@ -1,4 +1,4 @@
-from clipplex.config import IMAGES_DIR_PATH, VIDEO_DIR_PATH
+from clipplex.config import IMAGES_DIR_PATH, VIDEOS_DIR_PATH
 from clipplex.models.image import Image
 from clipplex.models.video import Video_
 from pathlib import Path
@@ -17,7 +17,7 @@ def get_images() -> list[str]:
 def get_instant_videos() -> list[dict[str, str]]:
     return [
         Video_.from_filepath(Path(dirpath) / filename).to_dict()
-        for dirpath, _, filenames in os.walk(VIDEO_DIR_PATH)
+        for dirpath, _, filenames in os.walk(VIDEOS_DIR_PATH)
         for filename in filenames
     ]
 
