@@ -22,7 +22,7 @@ def home():
     return redirect("/instant_video.html")
 
 
-@flaskapp.route("/api/video", methods=["POST"])
+@flaskapp.route("/api/videos", methods=["POST"])
 def video_create():
     args = request.args
     username = args.get("username")
