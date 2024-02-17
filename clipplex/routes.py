@@ -3,7 +3,7 @@ from clipplex.models.plex import PlexInfo
 from clipplex.models.snapshot import Snapshot
 from clipplex.models.video import Video
 from clipplex.utils import timing
-from clipplex.utils.files import delete_file, get_images_in_folder, get_instant_videos
+from clipplex.utils.files import delete_file, get_images, get_instant_videos
 from clipplex.utils.streamable import streamable_upload
 from clipplex.utils.timing import add_time
 from flask import Flask
@@ -73,7 +73,7 @@ def instant_snapshot():
     return render_template(
         "instant_snapshot.html",
         title="Instant Snapshot",
-        images=get_images_in_folder(),
+        images=get_images(),
     )
 
 
