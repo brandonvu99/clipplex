@@ -26,12 +26,12 @@ def home():
 def create_video():
     args = request.args
     username = args.get("username")
-    start_hour = args.get('start_hour')
-    start_minute = args.get('start_minute')
-    start_second = args.get('start_second')
-    end_hour = args.get('end_hour')
-    end_minute = args.get('end_minute')
-    end_second = args.get('end_second')
+    start_hour = args.get("start_hour")
+    start_minute = args.get("start_minute")
+    start_second = args.get("start_second")
+    end_hour = args.get("end_hour")
+    end_minute = args.get("end_minute")
+    end_second = args.get("end_second")
 
     start = timedelta(hours=start_hour, minutes=start_minute, seconds=start_second)
     end = timedelta(hours=end_hour, minutes=end_minute, seconds=end_second)
@@ -58,16 +58,17 @@ def get_instant_video(username: str, start: timedelta, end: timedelta):
 @flaskapp.route("/get_current_stream", methods=["GET", "POST"])
 def get_current_stream():
     username = request.args.get("username")
-    try:
-        plex = PlexInfo(username)
-    except:
-        return {"message": f"No session running for user {username}"}
-    return {
-        "file_path": str(plex.media_path),
-        "username": username,
-        "current_time": plex.current_media_time_str,
-        "media_title": plex.media_title,
-    }
+    plex = PlexInfo(username)
+    return (
+        {
+            "file_path": str(plex.media_path),
+            "username": username,
+            "current_time": plex.current_media_time_str,
+            "media_title": plex.media_title,
+        }
+        if plex
+        else {"message": f"No session running for user {username}."}
+    )
 
 
 @flaskapp.route("/get_instant_snapshot", methods=["GET"])

@@ -1,13 +1,15 @@
 from clipplex.utils.timing import milli_to_string
+from config import PLEX_TOKEN, PLEX_URL
+from xml.etree import ElementTree
+from xml.etree.ElementTree import Element
 import os
-import xml.etree.ElementTree as ET
 import requests
 
 
 class PlexInfo:
     def __init__(self, username):
-        self.plex_url = os.environ.get("PLEX_URL")
-        self.plex_token = os.environ.get("PLEX_TOKEN")
+        self.plex_token = PLEX_TOKEN
+        self.plex_url = PLEX_URL
         self.params = (("X-Plex-Token", {self.plex_token}),)
         self.sessions_xml = self._get_current_sessions_xml()
         self.username = username
@@ -41,14 +43,14 @@ class PlexInfo:
         media_dict = list(list(self.sessions_xml))[self.session_id].attrib
         return int(media_dict["viewOffset"])
 
-    def _get_current_sessions_xml(self) -> ET:
+    def _get_current_sessions_xml(self) -> Element | None:
         """Get the XML from plex for the current user session.
 
         Returns:
-            ET: XML tree of the current user session
+            Element: XML tree of the current user session
         """
         response = requests.get(f"{self.plex_url}/status/sessions", params=self.params)
-        xml_content = ET.fromstring(response.content)
+        xml_content = ElementTree.fromstring(response.content)
         return xml_content
 
     def _get_file_path(self) -> str:
@@ -86,14 +88,14 @@ class PlexInfo:
         video_dict = list(list(self.media_path_xml))[0].attrib
         return video_dict["type"]
 
-    def _get_media_path_xml(self) -> ET:
+    def _get_media_path_xml(self) -> Element:
         """Get the XML from plex for the current user session.
 
         Returns:
-            ET: XML tree of the current video being played
+            Element: XML tree of the current video being played
         """
         response = requests.get(f"{self.plex_url}{self.media_key}", params=self.params)
-        xml_content = ET.fromstring(response.content)
+        xml_content = ElementTree.fromstring(response.content)
         return xml_content
 
     def _get_media_key(self) -> str:
