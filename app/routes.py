@@ -3,6 +3,12 @@ from app.forms import video as formVideo
 from flask import render_template, redirect, request, jsonify
 import clipplexAPI
 import time
+from app import routes
+from flask import Flask
+import os
+
+flaskapp = Flask(__name__, static_url_path="/static")
+flaskapp.config["SECRET_KEY"] = "524t098wruigofjvncx98uwroeiyhfjdk"
 
 
 @flaskapp.route("/")
