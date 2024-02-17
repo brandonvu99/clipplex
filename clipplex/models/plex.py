@@ -1,5 +1,7 @@
 from clipplex.utils.timing import milli_to_string
 from clipplex.config import PLEX_TOKEN, PLEX_URL
+from clipplex.utils.files import plex_filepath_to_clipplex_filepath
+from pathlib import Path
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
 import os
@@ -73,7 +75,7 @@ class PlexInfo:
         xml_content = ElementTree.fromstring(response.content)
         return xml_content
 
-    def _get_file_path(self) -> str:
+    def _get_file_path(self) -> Path:
         """Get the file path of the video currently played by the user.
 
         Returns:
@@ -82,7 +84,9 @@ class PlexInfo:
         media_dict = list(list(list(list(self.media_path_xml)[0]))[0])[
             0
         ].attrib  # REPLACE THAT BY A FIND PART TAG
-        return media_dict["file"]
+        plex_filepath = Path(media_dict["file"])
+        clipplex_filepath = plex_filepath_to_clipplex_filepath(plex_filepath)
+        return Path(media_dict["file"])
 
     def _get_file_title(self) -> str:
         """Get the title of the video currently played by the user.
