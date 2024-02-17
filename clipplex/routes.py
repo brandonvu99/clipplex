@@ -8,6 +8,7 @@ from clipplex.utils.streamable import streamable_upload
 from clipplex.utils.timing import add_time, create_timestamp_str
 from flask import Flask
 from flask import render_template, redirect, request, jsonify
+import logging
 import time
 
 flaskapp = Flask(__name__, static_url_path="/static")
@@ -42,8 +43,7 @@ def get_instant_video(username, start, end):
     media_name = plex_data.media_title.replace(" ", "")
     file_name = f"{username}_{media_name}_{int(time.time())}"
     current_media_time = plex_data.current_media_time_str
-    # TODO(use logging library instead of print)
-    print(
+    logging.info(
         f"Creating video of {clip_time} seconds starting at {start} for user {username} for file {plex_data.media_path}"
     )
     video = Video(plex_data, start, clip_time, file_name)
@@ -121,7 +121,7 @@ def remove_file():
 def signin():
     token = request.get_json()["token"]
     valid_login, user_details, user_group = check_credentials(token=token)
-    print(valid_login, user_details, user_group)
+    logging.info(valid_login, user_details, user_group)
 
 
 def check_credentials(token=None):
