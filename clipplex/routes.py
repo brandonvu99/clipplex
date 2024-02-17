@@ -34,6 +34,7 @@ def get_instant_video(username, start, end):
     media_name = plex_data.media_title.replace(" ", "")
     file_name = f"{username}_{media_name}_{int(time.time())}"
     current_media_time = plex_data.current_media_time_str
+    # TODO(use logging library instead of print)
     print(
         f"Creating video of {clip_time} seconds starting at {start} for user {username} for file {plex_data.media_path}"
     )
