@@ -19,10 +19,6 @@ def _pad_time(time) -> str:
         time = f"0{time}"
     return time
 
-def create_timestamp_str(hour: int, minute: int, second: int) -> str:
-    return f"{hour:02d}:{minute:02d}:{second:02d}"
-
-
 def calculate_clip_time(start, end) -> int:
     start = start.split(":")
     start_total_sec = (int(start[0]) * 3600) + (int(start[1]) * 60) + (int(start[2]))
@@ -30,3 +26,9 @@ def calculate_clip_time(start, end) -> int:
     end_total_sec = (int(end[0]) * 3600) + (int(end[1]) * 60) + (int(end[2]))
     total_second = end_total_sec - start_total_sec
     return total_second
+
+def timestamp_str_of(td: timedelta) -> str:
+    total_seconds = td.total_seconds()
+    hours, hours_remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(hours_remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"

@@ -5,9 +5,11 @@ from clipplex.models.video import Video
 from clipplex.utils import timing
 from clipplex.utils.files import delete_file, get_images, get_instant_videos
 from clipplex.utils.streamable import streamable_upload
-from clipplex.utils.timing import add_time, create_timestamp_str
+from clipplex.utils.timing import add_time, timestamp_str_of
+from datetime import timedelta
 from flask import Flask
 from flask import render_template, redirect, request, jsonify
+from pathlib import Path
 import logging
 import time
 
@@ -31,23 +33,25 @@ def create_video():
     end_minute = args.get('end_minute')
     end_second = args.get('end_second')
 
-    start_timestamp = create_timestamp_str(start_hour, start_minute, start_second)
-    end_timestamp = create_timestamp_str(end_hour, end_minute, end_second)
-    result = get_instant_video(username, start_timestamp, end_timestamp)
+    start = timedelta(hours=start_hour, minutes=start_minute, seconds=start_second)
+    end = timedelta(hours=end_hour, minutes=end_minute, seconds=end_second)
+    result = get_instant_video(username, start, end)
     return jsonify(result)
 
 
-def get_instant_video(username, start, end):
+def get_instant_video(username: str, start: timedelta, end: timedelta):
     plex_data = PlexInfo(username)
-    clip_time = timing.calculate_clip_time(start, end)
-    media_name = plex_data.media_title.replace(" ", "")
-    file_name = f"{username}_{media_name}_{int(time.time())}"
-    current_media_time = plex_data.current_media_time_str
+    clip_duration_secs = (start - end).total_seconds()
+    media_name = plex_data.media_title.replace(" ", "-")
+    video_filepath = Path(username) / media_name / f"{int(time.time())}"
     logging.info(
-        f"Creating video of {clip_time} seconds starting at {start} for user {username} for file {plex_data.media_path}"
+        f"Creating video of {clip_duration_secs} seconds starting at {start} for user {username} for file {plex_data.media_path}."
     )
-    video = Video(plex_data, start, clip_time, file_name)
+    video = Video(plex_data, start, clip_duration_secs, video_filepath)
     video.extract_video()
+    logging.info(
+        f"Created video of {clip_duration_secs} seconds starting at {start} for user {username} for file {plex_data.media_path}."
+    )
     return {"result": "success"}
 
 
