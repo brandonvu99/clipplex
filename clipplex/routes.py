@@ -1,4 +1,4 @@
-from clipplex.forms import videoForm
+from clipplex.forms import VideoForm
 from clipplex.models.plex import PlexInfo
 from clipplex.models.snapshot import Snapshot
 from clipplex.models.video import Video
@@ -84,7 +84,7 @@ def instant_snapshot():
 def instant_video():
     return render_template(
         "instant_video.html",
-        form=videoForm(),
+        form=VideoForm(),
         title="Instant Video",
         videos=get_instant_videos(),
     )
