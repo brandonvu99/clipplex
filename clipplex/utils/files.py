@@ -18,7 +18,7 @@ def get_images() -> list[str]:
     ]
 
 
-def get_clips()() -> list[dict[str, str]]:
+def get_clips() -> list[dict[str, str]]:
     return [
         Clip_.from_filepath(Path(dirpath) / filename).to_dict()
         for dirpath, _, filenames in os.walk(CLIPS_DIRPATH)
