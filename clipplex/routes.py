@@ -1,13 +1,13 @@
+from clipplex.forms import video as formVideo
+from clipplex.models.plex import PlexInfo
+from clipplex.models.snapshot import Snapshot
+from clipplex.models.video import Video
+from clipplex.utils import timing
+from clipplex.utils.files import delete_file, get_images_in_folder, get_videos_in_folder
+from clipplex.utils.streamable import streamable_upload
+from clipplex.utils.timing import add_time
 from flask import Flask
 from flask import render_template, redirect, request, jsonify
-from forms import video as formVideo
-from models.plex import PlexInfo
-from models.snapshot import Snapshot
-from models.video import Video
-from utils import timing
-from utils.files import delete_file, get_images_in_folder, get_videos_in_folder
-from utils.streamable import streamable_upload
-from utils.timing import add_time
 import time
 
 flaskapp = Flask(__name__, static_url_path="/static")

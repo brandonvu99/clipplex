@@ -1,4 +1,4 @@
-from config import MEDIA_STATIC_PATH
+from clipplex.config import MEDIA_STATIC_PATH
 import ffmpeg
 import os
 

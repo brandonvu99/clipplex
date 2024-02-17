@@ -1,4 +1,4 @@
-from utils.timing import milli_to_string
+from clipplex.utils.timing import milli_to_string
 import os
 import xml.etree.ElementTree as ET
 import requests

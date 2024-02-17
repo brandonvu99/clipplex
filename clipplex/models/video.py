@@ -1,5 +1,5 @@
-from config import MEDIA_STATIC_PATH
-from models.plex import PlexInfo
+from clipplex.config import MEDIA_STATIC_PATH
+from clipplex.models.plex import PlexInfo
 import ffmpeg
 
 

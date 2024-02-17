@@ -1,0 +1,1 @@
+from clipplex.routes import flaskapp
