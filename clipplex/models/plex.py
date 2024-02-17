@@ -28,6 +28,18 @@ class PlexInfo:
     def __bool__(self) -> bool:
         return self.sessions_xml is not None
 
+    def to_stream_info(self) -> dict[str, str]:
+        return (
+            {
+                "file_path": str(self.media_path),
+                "username": self.username,
+                "current_time": self.current_media_time_str,
+                "media_title": self.media_title,
+            }
+            if self.sessions_xml is not None
+            else {"message": f"No session running for user {self.username}."}
+        )
+
     def _get_media_fps(self) -> float:
         """Get the frame rate of the video currently played by the user.
 
@@ -56,7 +68,7 @@ class PlexInfo:
         """
         if self.plex_url is None:
             return None
-        
+
         response = requests.get(f"{self.plex_url}/status/sessions", params=self.params)
         xml_content = ElementTree.fromstring(response.content)
         return xml_content
