@@ -1,1 +1,1 @@
-from app import flaskapp
+from clipplex import flaskapp

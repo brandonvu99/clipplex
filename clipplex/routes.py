@@ -1,4 +1,4 @@
-from app.forms import video as formVideo
+from clipplex.forms import video as formVideo
 from flask import Flask
 from flask import render_template, redirect, request, jsonify
 import clipplexAPI
