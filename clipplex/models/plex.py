@@ -1,5 +1,5 @@
 from clipplex.utils.timing import milli_to_string
-from config import PLEX_TOKEN, PLEX_URL
+from clipplex.config import PLEX_TOKEN, PLEX_URL
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
 import os
@@ -12,16 +12,21 @@ class PlexInfo:
         self.plex_url = PLEX_URL
         self.params = (("X-Plex-Token", {self.plex_token}),)
         self.sessions_xml = self._get_current_sessions_xml()
-        self.username = username
-        self.session_id = self._get_session_id(username)
-        self.media_key = self._get_media_key()
-        self.media_path_xml = self._get_media_path_xml()
-        self.media_path = self._get_file_path()
-        self.media_fps = self._get_media_fps()
-        self.media_type = self._get_file_type()
-        self.media_title = self._get_file_title()
-        self.current_media_time_int = self._get_current_media_time()
-        self.current_media_time_str = milli_to_string(self.current_media_time_int)
+
+        if self.sessions_xml:
+            self.username = username
+            self.session_id = self._get_session_id(username)
+            self.media_key = self._get_media_key()
+            self.media_path_xml = self._get_media_path_xml()
+            self.media_path = self._get_file_path()
+            self.media_fps = self._get_media_fps()
+            self.media_type = self._get_file_type()
+            self.media_title = self._get_file_title()
+            self.current_media_time_int = self._get_current_media_time()
+            self.current_media_time_str = milli_to_string(self.current_media_time_int)
+
+    def __bool__(self) -> bool:
+        return self.sessions_xml is not None
 
     def _get_media_fps(self) -> float:
         """Get the frame rate of the video currently played by the user.
@@ -49,6 +54,9 @@ class PlexInfo:
         Returns:
             Element: XML tree of the current user session
         """
+        if self.plex_url is None:
+            return None
+        
         response = requests.get(f"{self.plex_url}/status/sessions", params=self.params)
         xml_content = ElementTree.fromstring(response.content)
         return xml_content

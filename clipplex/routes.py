@@ -58,15 +58,15 @@ def get_instant_video(username: str, start: timedelta, end: timedelta):
 @flaskapp.route("/get_current_stream", methods=["GET", "POST"])
 def get_current_stream():
     username = request.args.get("username")
-    plex = PlexInfo(username)
+    plex_info = PlexInfo(username)
     return (
         {
-            "file_path": str(plex.media_path),
+            "file_path": str(plex_info.media_path),
             "username": username,
-            "current_time": plex.current_media_time_str,
-            "media_title": plex.media_title,
+            "current_time": plex_info.current_media_time_str,
+            "media_title": plex_info.media_title,
         }
-        if plex
+        if plex_info
         else {"message": f"No session running for user {username}."}
     )
 
