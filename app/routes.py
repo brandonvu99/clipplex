@@ -10,51 +10,6 @@ def home():
     return redirect("/instant_video.html")
 
 
-@app.route("/instant_snapshot.html", methods=["GET"])
-def instant_snapshot():
-    return render_template(
-        "instant_snapshot.html",
-        title="Instant Snapshot",
-        images=clipplexAPI.Utils.get_images_in_folder(),
-    )
-
-
-@app.route("/get_instant_snapshot", methods=["GET"])
-def get_instant_snapshot():
-    plex_data = clipplexAPI.PlexInfo("jonike")  # DEBUG
-    snapshot = clipplexAPI.Snapshot(
-        plex_data.media_path, plex_data.current_media_time_str, plex_data.media_fps
-    )
-    snapshot._download_frames()
-    return "Files downloaded"
-
-
-@app.route("/get_current_stream", methods=["GET", "POST"])
-def get_current_stream():
-    username = request.args.get("username")
-    try:
-        plex = clipplexAPI.PlexInfo(username)
-    except:
-        return {"message": f"No session running for user {username}"}
-    return {
-        "file_path": str(plex.media_path),
-        "username": username,
-        "current_time": plex.current_media_time_str,
-        "media_title": plex.media_title,
-    }
-
-
-@app.route("/instant_video.html", methods=["GET"])
-def timed_video():
-    form = formVideo()
-    return render_template(
-        "instant_video.html",
-        form=form,
-        title="Instant Video",
-        videos=clipplexAPI.Utils.get_videos_in_folder(),
-    )
-
-
 @app.route("/create_video", methods=["POST"])
 def create_video():
     args = request.args
@@ -79,6 +34,56 @@ def get_instant_video(username, start, end):
     return {"result": "success"}
 
 
+@app.route("/get_current_stream", methods=["GET", "POST"])
+def get_current_stream():
+    username = request.args.get("username")
+    try:
+        plex = clipplexAPI.PlexInfo(username)
+    except:
+        return {"message": f"No session running for user {username}"}
+    return {
+        "file_path": str(plex.media_path),
+        "username": username,
+        "current_time": plex.current_media_time_str,
+        "media_title": plex.media_title,
+    }
+
+
+@app.route("/get_instant_snapshot", methods=["GET"])
+def get_instant_snapshot():
+    plex_data = clipplexAPI.PlexInfo("jonike")  # DEBUG
+    snapshot = clipplexAPI.Snapshot(
+        plex_data.media_path, plex_data.current_media_time_str, plex_data.media_fps
+    )
+    snapshot._download_frames()
+    return "Files downloaded"
+
+
+@app.route("/instant_snapshot.html", methods=["GET"])
+def instant_snapshot():
+    return render_template(
+        "instant_snapshot.html",
+        title="Instant Snapshot",
+        images=clipplexAPI.Utils.get_images_in_folder(),
+    )
+
+
+@app.route("/instant_video.html", methods=["GET"])
+def timed_video():
+    form = formVideo()
+    return render_template(
+        "instant_video.html",
+        form=form,
+        title="Instant Video",
+        videos=clipplexAPI.Utils.get_videos_in_folder(),
+    )
+
+
+@app.route("/login.html", methods=["GET", "POST"])
+def login():
+    return render_template("login.html")
+
+
 @app.route("/quick_add_time_to_start_time", methods=["POST"])
 def quick_add_time_to_start_time():
     start_time = request.args.get("start_time")
@@ -96,18 +101,6 @@ def remove_file():
         return "Problem downloading the file"
 
 
-@app.route("/streamable_upload", methods=["POST"])
-def streamable_upload():
-    file_path = request.args.get("file_path")
-    upload = clipplexAPI.Utils().streamable_upload(file_path)
-    return upload
-
-
-@app.route("/login.html", methods=["GET", "POST"])
-def login():
-    return render_template("login.html")
-
-
 @app.route("/signin", methods=["POST"])
 def signin():
     token = request.get_json()["token"]
@@ -122,3 +115,10 @@ def check_credentials(token=None):
 
     if plex_login is not None:
         return True, plex_login[0], plex_login[1]
+
+
+@app.route("/streamable_upload", methods=["POST"])
+def streamable_upload():
+    file_path = request.args.get("file_path")
+    upload = clipplexAPI.Utils().streamable_upload(file_path)
+    return upload
