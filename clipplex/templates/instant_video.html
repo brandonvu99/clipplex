@@ -286,7 +286,7 @@
         document.getElementById("Current_time_value").innerHTML = obj.current_time
         }
       }
-      const url='/api/stream?username='+username;
+      const url='/api/streams/'+username;
       Http.open("GET", url);
       Http.send();
   }
