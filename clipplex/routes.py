@@ -1,7 +1,7 @@
 from clipplex.forms import video as formVideo
 from flask import Flask
 from flask import render_template, redirect, request, jsonify
-import clipplexAPI
+import clipplex.clipplex.models.clipplexAPI as clipplexAPI
 import time
 
 flaskapp = Flask(__name__, static_url_path="/static")
