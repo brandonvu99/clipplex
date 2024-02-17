@@ -1,5 +1,7 @@
 from clipplex.config import MEDIA_PATH
 from clipplex.models.plex import PlexInfo
+from __future__ import annotations
+from pathlib import Path
 import ffmpeg
 
 
@@ -43,4 +45,40 @@ class Video:
                 },
             )
             .run(capture_stdout=True)
+        )
+
+
+class Video_(object):
+    def __init__(
+        self,
+        filepath: Path,
+        title: str,
+        original_start_time: str,
+        username: str,
+        show: str,
+        season_number: int,
+        episode_number: int,
+    ) -> None:
+        self.filepath = filepath
+        self.title = title
+        self.original_start_time = original_start_time
+        self.username = username
+        self.show = show
+        self.season_number = season_number
+        self.episode_number = episode_number
+
+    def to_dict(self) -> dict[str, str]:
+        return self.__dict__
+
+    @staticmethod
+    def from_filepath(filepath: Path) -> Video_:
+        metadata = ffmpeg.probe(filepath)["format"]["tags"]
+        return Video_(
+            filepath=filepath.parts[1:],
+            title=metadata.get("title") or "",
+            original_start_time=metadata.get("comment") or "",
+            username=metadata.get("artist") or "",
+            show=metadata.get("show") or "",
+            episode_number=metadata.get("episode_id") or "",
+            season_number=metadata.get("season_number") or "",
         )

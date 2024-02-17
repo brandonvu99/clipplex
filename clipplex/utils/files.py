@@ -1,4 +1,6 @@
 from clipplex.config import MEDIA_PATH, VIDEO_DIR_PATH
+from clipplex.models.video import Video_
+from pathlib import Path
 import ffmpeg
 import os
 
@@ -15,20 +17,11 @@ def get_images_in_folder() -> list:
 
 
 def get_instant_videos() -> list:
-    folder_list = []
-    for file in os.listdir(VIDEO_DIR_PATH):
-        file_dict = {}
-        file = os.path.join(VIDEO_DIR_PATH, file)
-        metadata = ffmpeg.probe(file)["format"]["tags"]
-        file_dict["file_path"] = "/".join(file.split("/")[1:])
-        file_dict["title"] = metadata.get("title") or ""
-        file_dict["original_start_time"] = metadata.get("comment") or ""
-        file_dict["username"] = metadata.get("artist") or ""
-        file_dict["show"] = metadata.get("show") or ""
-        file_dict["episode_number"] = metadata.get("episode_id") or ""
-        file_dict["season_number"] = metadata.get("season_number") or ""
-        folder_list.append(file_dict)
-    return folder_list
+    return [
+        Video_.from_filepath(Path(dirpath) / filename).to_dict()
+        for dirpath, _, filenames in os.walk(VIDEO_DIR_PATH)
+        for filename in filenames
+    ]
 
 
 def delete_file(self, file_path) -> bool:
