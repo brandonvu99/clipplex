@@ -55,8 +55,8 @@ def get_instant_video(username: str, start: timedelta, end: timedelta):
     return {"result": "success"}
 
 
-@flaskapp.route("/get_current_stream", methods=["GET", "POST"])
-def get_current_stream():
+@flaskapp.route("/api/stream", methods=["GET"])
+def get_stream():
     username = request.args.get("username")
     return PlexInfo(username).to_stream_info()
 
