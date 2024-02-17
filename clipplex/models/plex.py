@@ -86,7 +86,7 @@ class PlexInfo:
         ].attrib  # REPLACE THAT BY A FIND PART TAG
         plex_filepath = Path(media_dict["file"])
         clipplex_filepath = plex_filepath_to_clipplex_filepath(plex_filepath)
-        return Path(media_dict["file"])
+        return clipplex_filepath
 
     def _get_file_title(self) -> str:
         """Get the title of the video currently played by the user.
