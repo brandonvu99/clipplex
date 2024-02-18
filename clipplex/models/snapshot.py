@@ -1,4 +1,4 @@
-from clipplex.config import MEDIA_DIRPATH
+from clipplex.config import GENERATED_MEDIA_DIRPATH
 import subprocess
 
 
@@ -9,7 +9,7 @@ class Snapshot:
         self.fps = int(fps)
 
     def _download_frames(self):
-        cmd = f"ffmpeg -ss {self.time} -i {self.media_path} -vframes {self.fps} -qscale:v 2 {MEDIA_DIRPATH}/images/{self.time.replace(':','_')}_%03d.jpg"
+        cmd = f"ffmpeg -ss {self.time} -i {self.media_path} -vframes {self.fps} -qscale:v 2 {GENERATED_MEDIA_DIRPATH}/images/{self.time.replace(':','_')}_%03d.jpg"
         a = subprocess.call(
             cmd, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL
         )

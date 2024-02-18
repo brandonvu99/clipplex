@@ -1,30 +1,73 @@
+from __future__ import annotations
+from abc import ABC, abstractmethod
 from clipplex.utils.timing import milli_to_string
-from clipplex.config import PLEX_TOKEN, PLEX_URL, PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH
+from clipplex.config import (
+    PLEX_TOKEN,
+    PLEX_URL,
+    PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH,
+    PLEX_REQUEST_PARAMS,
+)
 from pathlib import Path
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
+import logging
 import os
 import requests
 
 
-class PlexInfo:
+class PlexInfo(ABC):
+
+    @abstractmethod
+    def to_stream_info(self) -> dict[str, str]:
+        pass
+
+    @staticmethod
+    def create_plex_info(username) -> PlexInfo:
+        sessions_xml = PlexInfo.get_current_sessions_xml()
+        logging.info(sessions_xml)
+        return ActivePlexInfo(username) if sessions_xml else InactivePlexInfo(username)
+
+    @staticmethod
+    def get_current_sessions_xml() -> Element | None:
+        """Get the XML from plex for the current user session.
+
+        Returns:
+            Element: XML tree of the current user session
+        """
+        if PLEX_URL is None:
+            return None
+
+        response = requests.get(
+            f"{PLEX_URL}/status/sessions", params=PLEX_REQUEST_PARAMS
+        )
+        xml_content = ElementTree.fromstring(response.content)
+        return xml_content
+
+
+class InactivePlexInfo(PlexInfo):
+    def __init__(self, username) -> None:
+        self.username = username
+
+    def to_stream_info(self) -> dict[str, str]:
+        return {"message": f"No session running for user {self.username}."}
+
+
+class ActivePlexInfo(PlexInfo):
     def __init__(self, username):
         self.plex_token = PLEX_TOKEN
         self.plex_url = PLEX_URL
         self.params = (("X-Plex-Token", {self.plex_token}),)
-        self.sessions_xml = self._get_current_sessions_xml()
-
-        if self.sessions_xml:
-            self.username = username
-            self.session_id = self._get_session_id(username)
-            self.media_key = self._get_media_key()
-            self.media_path_xml = self._get_media_path_xml()
-            self.media_path = self._get_file_path()
-            self.media_fps = self._get_media_fps()
-            self.media_type = self._get_file_type()
-            self.media_title = self._get_file_title()
-            self.current_media_time_int = self._get_current_media_time()
-            self.current_media_time_str = milli_to_string(self.current_media_time_int)
+        self.sessions_xml = PlexInfo.get_current_sessions_xml()
+        self.username = username
+        self.session_id = self._get_session_id(username)
+        self.media_key = self._get_media_key()
+        self.media_path_xml = self._get_media_path_xml()
+        self.media_path: Path = self._get_file_path()
+        self.media_fps = self._get_media_fps()
+        self.media_type = self._get_file_type()
+        self.media_title = self._get_file_title()
+        self.current_media_time_int = self._get_current_media_time()
+        self.current_media_time_str = milli_to_string(self.current_media_time_int)
 
     def __bool__(self) -> bool:
         return self.sessions_xml is not None
@@ -61,19 +104,6 @@ class PlexInfo:
         media_dict = list(list(self.sessions_xml))[self.session_id].attrib
         return int(media_dict["viewOffset"])
 
-    def _get_current_sessions_xml(self) -> Element | None:
-        """Get the XML from plex for the current user session.
-
-        Returns:
-            Element: XML tree of the current user session
-        """
-        if self.plex_url is None:
-            return None
-
-        response = requests.get(f"{self.plex_url}/status/sessions", params=self.params)
-        xml_content = ElementTree.fromstring(response.content)
-        return xml_content
-
     def _get_file_path(self) -> Path:
         """Get the file path of the video currently played by the user.
 
@@ -84,7 +114,7 @@ class PlexInfo:
             0
         ].attrib  # REPLACE THAT BY A FIND PART TAG
         plex_filepath = Path(media_dict["file"])
-        clipplex_filepath = PlexInfo.plex_filepath_to_clipplex_filepath(plex_filepath)
+        clipplex_filepath = ActivePlexInfo.plex_filepath_to_clipplex_filepath(plex_filepath)
         return clipplex_filepath
 
     def _get_file_title(self) -> str:
@@ -174,4 +204,6 @@ class PlexInfo:
         clipplex_dirpath = PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH[most_specific_plex_dir]
         relative_filepath = plex_filepath.relative_to(most_specific_plex_dir)
 
-        return clipplex_dirpath / relative_filepath
+        clipplex_clip_filepath = clipplex_dirpath / relative_filepath
+        logging.info(f"Translated ({plex_filepath}) to ({clipplex_clip_filepath})")
+        return clipplex_clip_filepath

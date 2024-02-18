@@ -230,8 +230,8 @@
   }
   function remove_file(file){
     const Http = new XMLHttpRequest();
-    const url='/remove_file?file_path='+file;
-    Http.open("POST", url);
+    const url='/api/clips?file_path='+file;
+    Http.open("DELETE", url);
     Http.send();
     location.reload();
   }

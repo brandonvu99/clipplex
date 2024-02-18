@@ -1,18 +1,21 @@
 from __future__ import annotations
-from clipplex.config import CLIPS_DIRPATH, MEDIA_DIRPATH
-from clipplex.models.plex import PlexInfo
+from datetime import timedelta, datetime
+from clipplex.config import CLIPS_DIRPATH
+from clipplex.models.plex import ActivePlexInfo
+from clipplex.utils.timing import timestamp_str_of
 from pathlib import Path
 import ffmpeg
+import logging
 import os
+import time
 
 
 class Clip:
-    def __init__(self, plex_data: PlexInfo, time: str, duration, file_name: str):
+    def __init__(self, plex_data: ActivePlexInfo, start_time: timedelta, end_time: timedelta):
         self.media_path = plex_data.media_path
         plex_attributes = list(list(plex_data.media_path_xml))[0].attrib
         self.metadata_title = plex_attributes["title"]
         self.metadata_current_media_time = plex_data.current_media_time_str
-        print(plex_data.username)
         self.metadata_username = plex_data.username
         if plex_data.media_type == "episode":
             self.metadata_season = plex_attributes["parentIndex"]
@@ -22,20 +25,27 @@ class Clip:
             self.metadata_season = ""
             self.metadata_episode_number = ""
             self.metadata_showname = ""
-        self.time = time
-        self.duration = duration
-        self.file_name = file_name
+        self.start_time = start_time
+        self.end_time = end_time
+
+        media_filepath_relative = self.media_path.relative_to("../Media")
+        self.save_filepath = CLIPS_DIRPATH / media_filepath_relative / f"{datetime.now().strftime(r'%Y-%m-%dT%H-%M-%S.%f')} - {self.metadata_username}.mkv"
 
     def create_clip(self):
+        start_timestamp = timestamp_str_of(self.start_time)
+        end_timestamp = timestamp_str_of(self.end_time)
+        duration_timestamp = timestamp_str_of(self.end_time - self.start_time)
+        logging.info(
+            f"From file ({self.media_path}, {start_timestamp} - {end_timestamp} [{duration_timestamp}]), creating clip to file ({self.save_filepath})."
+        )
+        self.save_filepath.parent.mkdir(parents=True, exist_ok=True)
         (
-            ffmpeg.input(self.media_path, ss=self.time, t=self.duration)
+            ffmpeg.input(self.media_path, ss=start_timestamp, to=end_timestamp)
             .output(
-                f"{MEDIA_DIRPATH}/videos/{self.file_name}.mp4",
+                str(self.save_filepath),
+                vcodec='copy',
+                acodec='copy',
                 map_metadata=-1,
-                vcodec="libx264",
-                acodec="libvorbis",
-                pix_fmt="yuv420p",
-                crf=18,
                 **{
                     "metadata:g:0": f"title={self.metadata_title}",
                     "metadata:g:1": f"season_number={self.metadata_season}",
@@ -46,6 +56,9 @@ class Clip:
                 },
             )
             .run(capture_stdout=True)
+        )
+        logging.info(
+            f"Created file ({self.save_filepath})."
         )
 
     @staticmethod

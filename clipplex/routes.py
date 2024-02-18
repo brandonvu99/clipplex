@@ -1,5 +1,5 @@
 from clipplex.forms import ClipForm
-from clipplex.models.plex import PlexInfo
+from clipplex.models.plex import PlexInfo, InactivePlexInfo, ActivePlexInfo
 from clipplex.models.snapshot import Snapshot
 from clipplex.models.clip import Clip
 from clipplex.models.image import Image
@@ -50,32 +50,23 @@ def render_snapshot():
 def clip_create():
     args = request.args
     username = args.get("username")
-    start_hour = args.get("start_hour")
-    start_minute = args.get("start_minute")
-    start_second = args.get("start_second")
-    end_hour = args.get("end_hour")
-    end_minute = args.get("end_minute")
-    end_second = args.get("end_second")
+    start_hour = int(args.get("start_hour"))
+    start_minute = int(args.get("start_minute"))
+    start_second = int(args.get("start_second"))
+    end_hour = int(args.get("end_hour"))
+    end_minute = int(args.get("end_minute"))
+    end_second = int(args.get("end_second"))
 
     start = timedelta(hours=start_hour, minutes=start_minute, seconds=start_second)
     end = timedelta(hours=end_hour, minutes=end_minute, seconds=end_second)
-    result = get_clip(username, start, end)
+    result = generate_clip(username, start, end)
     return jsonify(result)
 
 
-def get_clip(username: str, start: timedelta, end: timedelta):
-    plex_data = PlexInfo(username)
-    clip_duration_secs = (start - end).total_seconds()
-    media_name = plex_data.media_title.replace(" ", "-")
-    clip_filepath = Path(username) / media_name / f"{int(time.time())}"
-    logging.info(
-        f"Creating clip of {clip_duration_secs} seconds starting at {start} for user {username} for file {plex_data.media_path}."
-    )
-    clip = Clip(plex_data, start, clip_duration_secs, clip_filepath)
+def generate_clip(username: str, start_time: timedelta, end_time: timedelta):
+    plex_data = PlexInfo.create_plex_info(username)
+    clip = Clip(plex_data, start_time, end_time)
     clip.create_clip()
-    logging.info(
-        f"Created clip of {clip_duration_secs} seconds starting at {start} for user {username} for file {plex_data.media_path}."
-    )
     return {"result": "success"}
 
 
@@ -102,7 +93,7 @@ def snapshot_create():
 @flaskapp.route("/api/streams", methods=["GET"])
 @flaskapp.route("/api/streams/<username>")
 def stream_get(username):
-    return PlexInfo(username).to_stream_info()
+    return PlexInfo.create_plex_info(username).to_stream_info()
 
 
 # TODO(make this a client side function or create a util api)

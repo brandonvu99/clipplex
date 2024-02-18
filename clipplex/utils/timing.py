@@ -31,4 +31,8 @@ def timestamp_str_of(td: timedelta) -> str:
     total_seconds = td.total_seconds()
     hours, hours_remainder = divmod(total_seconds, 3600)
     minutes, seconds = divmod(hours_remainder, 60)
+
+    hours = int(hours)
+    minutes = int(minutes)
+    seconds = int(seconds)
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
