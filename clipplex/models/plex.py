@@ -91,6 +91,10 @@ class ActivePlexInfo(PlexInfo):
         Returns:
             float: Frame Rate of the video
         """
+
+        media_element = self.sessions_xml.findall("./MediaContainer/Video/Media/Part/Stream[@streamType=1]")
+        
+
         media_dict = list(list(list(list(list(self.media_path_xml)[0]))[0])[0])[
             0
         ].attrib
