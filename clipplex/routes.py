@@ -3,10 +3,9 @@ from clipplex.models.plex import PlexInfo
 from clipplex.models.snapshot import Snapshot
 from clipplex.models.clip import Clip
 from clipplex.models.image import Image
-from clipplex.utils import timing
-from clipplex.utils.files import delete_file, get_clips
+from clipplex.utils.files import delete_file
 from clipplex.utils.streamable import streamable_upload
-from clipplex.utils.timing import add_time, timestamp_str_of
+from clipplex.utils.timing import add_time
 from datetime import timedelta
 from flask import Flask
 from flask import render_template, redirect, request, jsonify

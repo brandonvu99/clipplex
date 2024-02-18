@@ -1,6 +1,5 @@
 from clipplex.utils.timing import milli_to_string
 from clipplex.config import PLEX_TOKEN, PLEX_URL, PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH
-from clipplex.utils.files import plex_filepath_to_clipplex_filepath
 from pathlib import Path
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
