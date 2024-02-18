@@ -10,14 +10,6 @@ import ffmpeg
 import os
 
 
-def get_images() -> list[str]:
-    return [
-        Image(Path(dirpath) / filename).filepath
-        for dirpath, _, filenames in os.walk(IMAGES_DIRPATH)
-        for filename in filenames
-    ]
-
-
 def get_clips() -> list[dict[str, str]]:
     return [
         Clip_.from_filepath(Path(dirpath) / filename).to_dict()

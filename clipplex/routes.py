@@ -2,8 +2,9 @@ from clipplex.forms import ClipForm
 from clipplex.models.plex import PlexInfo
 from clipplex.models.snapshot import Snapshot
 from clipplex.models.clip import Clip
+from clipplex.models.image import Image
 from clipplex.utils import timing
-from clipplex.utils.files import delete_file, get_images, get_clips
+from clipplex.utils.files import delete_file, get_clips
 from clipplex.utils.streamable import streamable_upload
 from clipplex.utils.timing import add_time, timestamp_str_of
 from datetime import timedelta
@@ -42,7 +43,7 @@ def render_snapshot():
     return render_template(
         "snapshot.html",
         title="Snapshot",
-        images=get_images(),
+        images=Image.get_all_images(),
     )
 
 
