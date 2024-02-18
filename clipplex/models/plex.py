@@ -8,8 +8,7 @@ from clipplex.config import (
     PLEX_REQUEST_PARAMS,
 )
 from pathlib import Path
-from xml.etree import ElementTree
-from xml.etree.ElementTree import Element
+import xml.etree.ElementTree as ET
 import logging
 import os
 import requests
@@ -24,15 +23,15 @@ class PlexInfo(ABC):
     @staticmethod
     def create_plex_info(username) -> PlexInfo:
         sessions_xml = PlexInfo.get_current_sessions_xml()
-        logging.info(sessions_xml)
+        logging.info(f"sessions_xml: {sessions_xml}")
         return ActivePlexInfo(username) if sessions_xml else InactivePlexInfo(username)
 
     @staticmethod
-    def get_current_sessions_xml() -> Element | None:
+    def get_current_sessions_xml() -> ET.ElementTree | None:
         """Get the XML from plex for the current user session.
 
         Returns:
-            Element: XML tree of the current user session
+            ET.ElementTree: XML tree of the current user session
         """
         if PLEX_URL is None:
             return None
@@ -40,7 +39,7 @@ class PlexInfo(ABC):
         response = requests.get(
             f"{PLEX_URL}/status/sessions", params=PLEX_REQUEST_PARAMS
         )
-        xml_content = ElementTree.fromstring(response.content)
+        xml_content = ET.ElementTree(ET.fromstring(response.content))
         return xml_content
 
 
@@ -58,6 +57,8 @@ class ActivePlexInfo(PlexInfo):
         self.plex_url = PLEX_URL
         self.params = (("X-Plex-Token", {self.plex_token}),)
         self.sessions_xml = PlexInfo.get_current_sessions_xml()
+        with open("sessions.xml", "w") as f:
+            self.sessions_xml.write(f, encoding="unicode")
         self.username = username
         self.session_id = self._get_session_id(username)
         self.media_key = self._get_media_key()
@@ -114,7 +115,9 @@ class ActivePlexInfo(PlexInfo):
             0
         ].attrib  # REPLACE THAT BY A FIND PART TAG
         plex_filepath = Path(media_dict["file"])
-        clipplex_filepath = ActivePlexInfo.plex_filepath_to_clipplex_filepath(plex_filepath)
+        clipplex_filepath = ActivePlexInfo.plex_filepath_to_clipplex_filepath(
+            plex_filepath
+        )
         return clipplex_filepath
 
     def _get_file_title(self) -> str:
@@ -141,14 +144,14 @@ class ActivePlexInfo(PlexInfo):
         video_dict = list(list(self.media_path_xml))[0].attrib
         return video_dict["type"]
 
-    def _get_media_path_xml(self) -> Element:
+    def _get_media_path_xml(self) -> ET.ElementTree:
         """Get the XML from plex for the current user session.
 
         Returns:
             Element: XML tree of the current video being played
         """
         response = requests.get(f"{self.plex_url}{self.media_key}", params=self.params)
-        xml_content = ElementTree.fromstring(response.content)
+        xml_content = ET.ElementTree(ET.fromstring(response.content))
         return xml_content
 
     def _get_media_key(self) -> str:
