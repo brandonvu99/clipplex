@@ -10,7 +10,7 @@ import ffmpeg
 import os
 
 
-def delete_file(self, file_path) -> bool:
+def delete_file(file_path) -> bool:
     try:
         os.remove(f"./app/{file_path}")
         return True
