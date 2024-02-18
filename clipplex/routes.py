@@ -29,7 +29,7 @@ def render_clip():
         "clip.html",
         form=ClipForm(),
         title="Clips",
-        clips=get_clips(),
+        clips=Clip.get_all_clips(),
     )
 
 

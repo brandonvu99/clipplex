@@ -1,8 +1,9 @@
 from __future__ import annotations
-from clipplex.config import MEDIA_DIRPATH
+from clipplex.config import CLIPS_DIRPATH, MEDIA_DIRPATH
 from clipplex.models.plex import PlexInfo
 from pathlib import Path
 import ffmpeg
+import os
 
 
 class Clip:
@@ -46,6 +47,14 @@ class Clip:
             )
             .run(capture_stdout=True)
         )
+
+    @staticmethod
+    def get_all_clips() -> list[dict[str, str]]:
+        return [
+            Clip_.from_filepath(Path(dirpath) / filename).to_dict()
+            for dirpath, _, filenames in os.walk(CLIPS_DIRPATH)
+            for filename in filenames
+        ]
 
 
 class Clip_(object):

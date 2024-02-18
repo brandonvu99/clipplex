@@ -10,13 +10,6 @@ import ffmpeg
 import os
 
 
-def get_clips() -> list[dict[str, str]]:
-    return [
-        Clip_.from_filepath(Path(dirpath) / filename).to_dict()
-        for dirpath, _, filenames in os.walk(CLIPS_DIRPATH)
-        for filename in filenames
-    ]
-
 
 def delete_file(self, file_path) -> bool:
     try:
