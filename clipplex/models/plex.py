@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from datetime import timedelta
 from clipplex.utils.timing import timestamp_str_of
 from clipplex.config import PLEX_TOKEN, PLEX_URL, PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH
-from pathlib import Path
+from pathlib import Path, PurePath, PureWindowsPath
 from pprint import pformat
 import xml.etree.ElementTree as ET
 import logging
@@ -148,6 +148,7 @@ class ActivePlexInfo(PlexInfo):
         because even though "/long/plex/path/to/media/" COULD match, the more specific one matches.
         """
 
+        plex_filepath = PurePath(PureWindowsPath(plex_filepath).as_posix())
         plex_dirpath_ancestors = [
             plex_dirpath
             for plex_dirpath in PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH.keys()
