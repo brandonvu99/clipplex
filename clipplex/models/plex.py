@@ -41,9 +41,10 @@ class PlexInfo(ABC):
 
     @staticmethod
     def get_all_connected_usernames() -> list[str]:
-        return [plex.myPlexAccount().username] + [
-            user.username for user in plex.myPlexAccount().users()
-        ]
+        return [plex.myPlexAccount().username]
+        # + [
+        #     user.username for user in plex.myPlexAccount().users()
+        # ]
 
 
 class InactivePlexInfo(PlexInfo):
