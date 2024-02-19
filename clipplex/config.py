@@ -13,4 +13,3 @@ PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH: dict[Path, Path] = {
 
 PLEX_TOKEN = os.environ.get("PLEX_TOKEN")
 PLEX_URL = os.environ.get("PLEX_URL")
-PLEX_REQUEST_PARAMS = (("X-Plex-Token", {PLEX_TOKEN}),) if PLEX_TOKEN else None

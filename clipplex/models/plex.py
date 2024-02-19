@@ -5,8 +5,7 @@ from clipplex.utils.timing import timestamp_str_of
 from clipplex.config import (
     PLEX_TOKEN,
     PLEX_URL,
-    PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH,
-    PLEX_REQUEST_PARAMS,
+    PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH
 )
 from pathlib import Path
 import xml.etree.ElementTree as ET
