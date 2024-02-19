@@ -2,11 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from datetime import timedelta
 from clipplex.utils.timing import timestamp_str_of
-from clipplex.config import (
-    PLEX_TOKEN,
-    PLEX_URL,
-    PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH
-)
+from clipplex.config import PLEX_TOKEN, PLEX_URL, PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import logging
@@ -56,27 +52,32 @@ class ActivePlexInfo(PlexInfo):
     def __init__(self, username: str, sessions: list[Media]):
         self.username = username
         self.session = sessions[0]
-        self.media_path: Path = self._get_translated_filepath()
         self.media_type = self.session.type
+
+        if self.media_type == "episode":
+            self.show_name = self.session.grandparentTitle
+            self.season = self.session.parentTitle
+            self.episode_number = self.session.index
+        elif self.media_type == "movie":
+            self.show_name = ""
+            self.season = ""
+            self.episode_number = ""
+        else:
+            raise ValueError(f"Unsupported media_type: {self.media_type}")
+
+        self.media_path: Path = self._get_translated_filepath()
         self.media_title = self._get_file_title()
         self.current_media_time_str = timestamp_str_of(
-            timedelta(self.session.viewOffset)
+            timedelta(milliseconds=self.session.viewOffset)
         )
-
-    def __bool__(self) -> bool:
-        return self.sessions_xml is not None
 
     def to_stream_info(self) -> dict[str, str]:
-        return (
-            {
-                "file_path": str(self.media_path),
-                "username": self.username,
-                "current_time": self.current_media_time_str,
-                "media_title": self.media_title,
-            }
-            if self.sessions_xml is not None
-            else {"message": f"No session running for user {self.username}."}
-        )
+        return {
+            "file_path": str(self.media_path),
+            "username": self.username,
+            "current_time": self.current_media_time_str,
+            "media_title": self.media_title,
+        }
 
     def _get_filepath(self) -> Path:
         """Get the file path of the video currently played by the user.

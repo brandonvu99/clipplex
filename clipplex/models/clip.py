@@ -11,25 +11,29 @@ import time
 
 
 class Clip:
-    def __init__(self, plex_data: ActivePlexInfo, start_time: timedelta, end_time: timedelta):
-        self.media_path = plex_data.media_path
-        plex_attributes = list(list(plex_data.media_path_xml))[0].attrib
-        self.metadata_title = plex_attributes["title"]
-        self.metadata_current_media_time = plex_data.current_media_time_str
-        self.metadata_username = plex_data.username
-        if plex_data.media_type == "episode":
-            self.metadata_season = plex_attributes["parentIndex"]
-            self.metadata_episode_number = plex_attributes["index"]
-            self.metadata_showname = plex_attributes["grandparentTitle"]
-        else:
-            self.metadata_season = ""
-            self.metadata_episode_number = ""
-            self.metadata_showname = ""
+    def __init__(
+        self, plex_info: ActivePlexInfo, start_time: timedelta, end_time: timedelta
+    ):
+        self.media_path = plex_info.media_path
         self.start_time = start_time
         self.end_time = end_time
 
+        self.metadata = {
+            "title": plex_info.media_title,
+            "show": plex_info.show_name,
+            "season": plex_info.season,
+            "episode": plex_info.episode_number,
+            "episode_timestamp": plex_info.current_media_time_str,
+            "artist": plex_info.username,
+        }
+
         media_filepath_relative = self.media_path.relative_to("../Media")
-        self.save_filepath = CLIPS_DIRPATH / media_filepath_relative / f"{datetime.now().strftime(r'%Y-%m-%dT%H-%M-%S.%f')} - {self.metadata_username}.mkv"
+        media_file_extension = self.media_path.suffix
+        self.save_filepath = (
+            CLIPS_DIRPATH
+            / media_filepath_relative
+            / f"{datetime.now().strftime(r'%Y-%m-%dT%H-%M-%S.%f')} - {self.metadata['artist']}{media_file_extension}"
+        )
 
     def create_clip(self):
         start_timestamp = timestamp_str_of(self.start_time)
@@ -43,23 +47,21 @@ class Clip:
             ffmpeg.input(self.media_path, ss=start_timestamp, to=end_timestamp)
             .output(
                 str(self.save_filepath),
-                vcodec='copy',
-                acodec='copy',
+                vcodec="copy",
+                acodec="copy",
                 map_metadata=-1,
                 **{
-                    "metadata:g:0": f"title={self.metadata_title}",
-                    "metadata:g:1": f"season_number={self.metadata_season}",
-                    "metadata:g:2": f"show={self.metadata_showname}",
-                    "metadata:g:3": f"episode_id={self.metadata_episode_number}",
-                    "metadata:g:4": f"comment={self.metadata_current_media_time}",
-                    "metadata:g:5": f"artist={self.metadata_username}",
+                    "metadata:g:0": "title={title}".format(**self.metadata),
+                    "metadata:g:1": "show={show}".format(**self.metadata),
+                    "metadata:g:2": "season={season}".format(**self.metadata),
+                    "metadata:g:3": "episode={episode}".format(**self.metadata),
+                    "metadata:g:4": "episode_timestamp={episode_timestamp}".format(**self.metadata),
+                    "metadata:g:5": "artist={artist}".format(**self.metadata),
                 },
             )
             .run(capture_stdout=True)
         )
-        logging.info(
-            f"Created file ({self.save_filepath})."
-        )
+        logging.info(f"Created file ({self.save_filepath}).")
 
     @staticmethod
     def get_all_clips() -> list[dict[str, str]]:
