@@ -6,12 +6,6 @@ def add_time(current_time: str, time_to_add: int) -> str:
     time_obj_with_time_added = time_obj + timedelta(seconds=time_to_add)
     return time_obj_with_time_added.strftime("%H:%M:%S")
 
-
-def _pad_time(time) -> str:
-    if len(str(time)) < 2:
-        time = f"0{time}"
-    return time
-
 def calculate_clip_time(start, end) -> int:
     start = start.split(":")
     start_total_sec = (int(start[0]) * 3600) + (int(start[1]) * 60) + (int(start[2]))
