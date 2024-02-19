@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from clipplex.utils.timing import milli_to_string
+from datetime import timedelta
+from clipplex.utils.timing import timestamp_str_of
 from clipplex.config import (
     PLEX_TOKEN,
     PLEX_URL,
@@ -11,10 +12,19 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 import logging
 import os
-import requests
+from plexapi.server import PlexServer
+from plexapi.media import Media
+from plexapi.video import Show, Movie
+
+
+plex = PlexServer(PLEX_URL, PLEX_TOKEN)
 
 
 class PlexInfo(ABC):
+    """
+    Treat PlexInfo and all of its subclasses as immutable, i.e. values are not updated as time passes.
+    Create a new PlexInfo object if up-to-date information is needed.
+    """
 
     @abstractmethod
     def to_stream_info(self) -> dict[str, str]:
@@ -22,25 +32,17 @@ class PlexInfo(ABC):
 
     @staticmethod
     def create_plex_info(username) -> PlexInfo:
-        sessions_xml = PlexInfo.get_current_sessions_xml()
-        logging.info(f"sessions_xml: {sessions_xml}")
-        return ActivePlexInfo(username) if sessions_xml else InactivePlexInfo(username)
+        sessions = PlexInfo.get_current_sessions()
+        return (
+            ActivePlexInfo(username, sessions)
+            if sessions
+            else InactivePlexInfo(username)
+        )
 
     @staticmethod
-    def get_current_sessions_xml() -> ET.ElementTree | None:
-        """Get the XML from plex for the current user session.
-
-        Returns:
-            ET.ElementTree: XML tree of the current user session
-        """
-        if PLEX_URL is None:
-            return None
-
-        response = requests.get(
-            f"{PLEX_URL}/status/sessions", params=PLEX_REQUEST_PARAMS
-        )
-        xml_content = ET.ElementTree(ET.fromstring(response.content))
-        return xml_content
+    def get_current_sessions() -> list[Media] | None:
+        sessions: list[Media] = plex.sessions()
+        return sessions if sessions else None
 
 
 class InactivePlexInfo(PlexInfo):
@@ -52,23 +54,15 @@ class InactivePlexInfo(PlexInfo):
 
 
 class ActivePlexInfo(PlexInfo):
-    def __init__(self, username):
-        self.plex_token = PLEX_TOKEN
-        self.plex_url = PLEX_URL
-        self.params = (("X-Plex-Token", {self.plex_token}),)
-        self.sessions_xml = PlexInfo.get_current_sessions_xml()
-        with open("sessions.xml", "w") as f:
-            self.sessions_xml.write(f, encoding="unicode")
+    def __init__(self, username: str, sessions: list[Media]):
         self.username = username
-        self.session_id = self._get_session_id(username)
-        self.media_key = self._get_media_key()
-        self.media_path_xml = self._get_media_path_xml()
-        self.media_path: Path = self._get_file_path()
-        self.media_fps = self._get_media_fps()
-        self.media_type = self._get_file_type()
+        self.session = sessions[0]
+        self.media_path: Path = self._get_translated_filepath()
+        self.media_type = self.session.type
         self.media_title = self._get_file_title()
-        self.current_media_time_int = self._get_current_media_time()
-        self.current_media_time_str = milli_to_string(self.current_media_time_int)
+        self.current_media_time_str = timestamp_str_of(
+            timedelta(self.session.viewOffset)
+        )
 
     def __bool__(self) -> bool:
         return self.sessions_xml is not None
@@ -85,40 +79,33 @@ class ActivePlexInfo(PlexInfo):
             else {"message": f"No session running for user {self.username}."}
         )
 
-    def _get_media_fps(self) -> float:
-        """Get the frame rate of the video currently played by the user.
-
-        Returns:
-            float: Frame Rate of the video
-        """
-
-        media_element = self.sessions_xml.findall("./MediaContainer/Video/Media/Part/Stream[@streamType=1]")
-        
-
-        media_dict = list(list(list(list(list(self.media_path_xml)[0]))[0])[0])[
-            0
-        ].attrib
-        return float(media_dict["frameRate"])
-
-    def _get_current_media_time(self) -> int:
-        """Get the offset between the start of the video and the current view position of the user.
-
-        Returns:
-            int: Offset between start of the video and current view time
-        """
-        media_dict = list(list(self.sessions_xml))[self.session_id].attrib
-        return int(media_dict["viewOffset"])
-
-    def _get_file_path(self) -> Path:
+    def _get_filepath(self) -> Path:
         """Get the file path of the video currently played by the user.
 
         Returns:
             str: Path of the video being played
         """
-        media_dict = list(list(list(list(self.media_path_xml)[0]))[0])[
-            0
-        ].attrib  # REPLACE THAT BY A FIND PART TAG
-        plex_filepath = Path(media_dict["file"])
+
+        for media in plex.library.sectionByID(self.session.librarySectionID).all():
+            if self.media_type == "episode":
+                if self.session.grandparentGuid == show.guid:
+                    show: Show = media
+                    season = show.season(title=self.session.parentTitle)
+                    episode = season.episode(title=self.session.title)
+
+                    return Path(episode.locations[0])
+            elif self.media_type == "movie":
+                if self.session.guid == media.guid:
+                    movie: Movie = media
+
+                    return Path(movie.locations[0])
+
+        raise ValueError(
+            f"Following session could not be mapped to a media file: {self.session}"
+        )
+
+    def _get_translated_filepath(self) -> Path:
+        plex_filepath = self._get_filepath()
         clipplex_filepath = ActivePlexInfo.plex_filepath_to_clipplex_filepath(
             plex_filepath
         )
@@ -131,56 +118,13 @@ class ActivePlexInfo(PlexInfo):
             str: If TV show, returns show + episode name, if movie, returns movie name.
         """
         if self.media_type == "episode":
-            video_dict = list(list(self.media_path_xml))[0].attrib
-            title = video_dict["title"]
-            show_name = video_dict["grandparentTitle"]
+            show_name = self.session.grandparentTitle
+            title = self.session.title
             return f"{show_name} - {title}"
-        else:
-            video_dict = list(list(self.media_path_xml))[0].attrib
-            return video_dict["title"]
+        elif self.media_type == "movie":
+            return self.session.title
 
-    def _get_file_type(self) -> str:
-        """Get the type of file of the video currently played by the user.
-
-        Returns:
-            str: File type of the video being played
-        """
-        video_dict = list(list(self.media_path_xml))[0].attrib
-        return video_dict["type"]
-
-    def _get_media_path_xml(self) -> ET.ElementTree:
-        """Get the XML from plex for the current user session.
-
-        Returns:
-            Element: XML tree of the current video being played
-        """
-        response = requests.get(f"{self.plex_url}{self.media_key}", params=self.params)
-        xml_content = ET.ElementTree(ET.fromstring(response.content))
-        return xml_content
-
-    def _get_media_key(self) -> str:
-        """Get the plex media key of the video being played.
-
-        Returns:
-            str: Plex media key
-        """
-        media_info = list(list(self.sessions_xml))[self.session_id].attrib
-        return media_info["key"]
-
-    def _get_session_id(self, username: str) -> int:
-        """Get the plex session id of the current session for the current user.
-
-        Args:
-            username (str): Username of the queried user.
-
-        Returns:
-            int: Return the index of the session
-        """
-        for sessions in list(self.sessions_xml):
-            for session in sessions:
-                if session.tag == "User" and session.attrib["title"] == username:
-                    return list(self.sessions_xml).index(sessions)
-        raise Exception(f"No stream running for user {username}")
+        raise ValueError(f"Unsupported media_type: {self.media_type}")
 
     @staticmethod
     def plex_filepath_to_clipplex_filepath(plex_filepath: Path) -> Path:

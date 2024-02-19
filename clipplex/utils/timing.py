@@ -1,13 +1,6 @@
 from datetime import datetime, timedelta
 
 
-def milli_to_string(millisec: int) -> str:
-    time = str(timedelta(milliseconds=millisec))
-    if len(time.split(":")[0]) < 2:
-        time = f"0{time}"
-    return time.split(".")[0]
-
-
 def add_time(current_time: str, time_to_add: int) -> str:
     time_obj = datetime.strptime(current_time, "%H:%M:%S")
     time_obj_with_time_added = time_obj + timedelta(seconds=time_to_add)
