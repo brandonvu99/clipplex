@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path, PurePath
 import os
 import yaml
 
@@ -20,7 +20,7 @@ if not CONFIG_FILEPATH.exists():
 with open(CONFIG_FILEPATH, "r") as f:
     config = yaml.safe_load(f)
 PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH: dict[Path, Path] = {
-    Path(plex_dirpath): Path(clipplex_dirpath)
+    PurePath(plex_dirpath): PurePath(clipplex_dirpath)
     for plex_dirpath, clipplex_dirpath in config[
         "PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH"
     ].items()
