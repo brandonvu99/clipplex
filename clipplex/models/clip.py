@@ -1,5 +1,5 @@
 from __future__ import annotations
-from clipplex.config import CLIPS_DIRPATH
+from clipplex.config import CLIPS_DIRPATH, ROOT_MEDIA_DIRPATH
 from clipplex.models.plex import ActivePlexInfo
 from clipplex.utils.timing import timestamp_str_of
 from datetime import timedelta, datetime
@@ -26,7 +26,8 @@ class Clip:
             "creator": plex_info.username,
         }
 
-        media_filepath_relative = self.media_path.relative_to("../Media")
+        # TODO(somehow make this dynamic enough to handle output path without needing configuration from user)
+        media_filepath_relative = self.media_path.relative_to(ROOT_MEDIA_DIRPATH)
         media_file_extension = self.media_path.suffix
         self.save_filepath = (
             CLIPS_DIRPATH
