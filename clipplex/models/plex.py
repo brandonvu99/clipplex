@@ -39,6 +39,12 @@ class PlexInfo(ABC):
         sessions: list[Media] = plex.sessions()
         return sessions if sessions else None
 
+    @staticmethod
+    def get_all_connected_usernames() -> list[str]:
+        return [plex.myPlexAccount().username] + [
+            user.username for user in plex.myPlexAccount().users()
+        ]
+
 
 class InactivePlexInfo(PlexInfo):
     def __init__(self, username) -> None:
