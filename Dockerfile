@@ -1,24 +1,16 @@
-FROM alpine:3.15
+FROM python:3.12.2-alpine3.19
 
 ARG PLEX_URL
 ARG PLEX_TOKEN
 ARG STREAMABLE_LOGIN
 ARG STREAMABLE_PASSWORD
+ARG TZ
 
-RUN apk --no-cache add build-base
-RUN apk --no-cache add tzdata
-RUN apk --no-cache add ffmpeg
-RUN apk --no-cache add python3
-RUN apk --no-cache add python3-dev
-RUN apk --no-cache add py-pip
-RUN cd /usr/bin \
-  && ln -sf python3.9 python
-
-ENV TZ=America/New_York
 ENV PLEX_URL=$PLEX_URL
 ENV PLEX_TOKEN=$PLEX_TOKEN
 ENV STREAMABLE_LOGIN=$STREAMABLE_LOGIN
 ENV STREAMABLE_PASSWORD=$STREAMABLE_PASSWORD
+ENV TZ=$TZ
 
 COPY . /app
 WORKDIR /app
