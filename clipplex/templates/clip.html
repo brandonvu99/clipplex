@@ -104,11 +104,11 @@
   {% for clip in clips %}
     {% set file_path = clip['file_path'] %}
     {% set title = clip['title'] %}
-    {% set original_time = clip['original_start_time'] %}
-    {% set creator = clip['username'] %}
     {% set show = clip['show'] %}
-    {% set episode = clip['episode_number'] %}
     {% set season = clip['season_number'] %}
+    {% set episode = clip['episode_number'] %}
+    {% set original_time = clip['original_start_time'] %}
+    {% set creator = clip['creator'] %}
       <tr>
         <td style="padding-right: 10px;">
           <video width="768" height="432" controls>

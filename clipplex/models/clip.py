@@ -24,7 +24,7 @@ class Clip:
             "season": plex_info.season,
             "episode": plex_info.episode_number,
             "episode_timestamp": plex_info.current_media_time_str,
-            "artist": plex_info.username,
+            "creator": plex_info.username,
         }
 
         media_filepath_relative = self.media_path.relative_to("../Media")
@@ -32,7 +32,7 @@ class Clip:
         self.save_filepath = (
             CLIPS_DIRPATH
             / media_filepath_relative
-            / f"{datetime.now().strftime(r'%Y-%m-%dT%H-%M-%S.%f')} - {self.metadata['artist']}{media_file_extension}"
+            / f"{datetime.now().strftime(r'%Y-%m-%dT%H-%M-%S.%f')} - {self.metadata['creator']}{media_file_extension}"
         )
 
     def create_clip(self):
@@ -55,54 +55,56 @@ class Clip:
                     "metadata:g:1": "show={show}".format(**self.metadata),
                     "metadata:g:2": "season={season}".format(**self.metadata),
                     "metadata:g:3": "episode={episode}".format(**self.metadata),
-                    "metadata:g:4": "episode_timestamp={episode_timestamp}".format(**self.metadata),
-                    "metadata:g:5": "artist={artist}".format(**self.metadata),
+                    "metadata:g:4": "episode_timestamp={episode_timestamp}".format(
+                        **self.metadata
+                    ),
+                    "metadata:g:5": "creator={creator}".format(**self.metadata),
                 },
             )
             .run(capture_stdout=True)
         )
         logging.info(f"Created file ({self.save_filepath}).")
 
-    @staticmethod
-    def get_all_clips() -> list[dict[str, str]]:
-        return [
-            Clip_.from_filepath(Path(dirpath) / filename).to_dict()
-            for dirpath, _, filenames in os.walk(CLIPS_DIRPATH)
-            for filename in filenames
-        ]
 
-
-class Clip_(object):
+class RenderedClip(object):
     def __init__(
         self,
         filepath: Path,
         title: str,
-        original_start_time: str,
-        username: str,
         show: str,
-        season_number: int,
-        episode_number: int,
+        season: int,
+        episode: int,
+        episode_timestamp: str,
+        creator: str,
     ) -> None:
         self.filepath = filepath
         self.title = title
-        self.original_start_time = original_start_time
-        self.username = username
         self.show = show
-        self.season_number = season_number
-        self.episode_number = episode_number
+        self.season_number = season
+        self.episode_number = episode
+        self.original_start_time = episode_timestamp
+        self.creator = creator
 
     def to_dict(self) -> dict[str, str]:
         return self.__dict__
 
     @staticmethod
-    def from_filepath(filepath: Path) -> Clip_:
+    def get_all_rendered_clips() -> list[dict[str, str]]:
+        return [
+            RenderedClip.from_filepath(Path(dirpath) / filename).to_dict()
+            for dirpath, _, filenames in os.walk(CLIPS_DIRPATH)
+            for filename in filenames
+        ]
+
+    @staticmethod
+    def from_filepath(filepath: Path) -> RenderedClip:
         metadata = ffmpeg.probe(filepath)["format"]["tags"]
-        return Clip_(
-            filepath=filepath.parts[1:],
+        return RenderedClip(
+            filepath=filepath,
             title=metadata.get("title") or "",
-            original_start_time=metadata.get("comment") or "",
-            username=metadata.get("artist") or "",
             show=metadata.get("show") or "",
-            episode_number=metadata.get("episode_id") or "",
-            season_number=metadata.get("season_number") or "",
+            season=metadata.get("season") or "",
+            episode=metadata.get("episode") or "",
+            episode_timestamp=metadata.get("episode_timestamp") or "",
+            creator=metadata.get("creator") or "",
         )

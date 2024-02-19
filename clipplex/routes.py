@@ -1,7 +1,7 @@
 from clipplex.forms import ClipForm
 from clipplex.models.plex import PlexInfo, InactivePlexInfo, ActivePlexInfo
 from clipplex.models.snapshot import Snapshot
-from clipplex.models.clip import Clip
+from clipplex.models.clip import Clip, RenderedClip
 from clipplex.models.image import Image
 from clipplex.utils.files import delete_file
 from clipplex.utils.streamable import streamable_upload
@@ -28,7 +28,7 @@ def render_clip():
         "clip.html",
         form=ClipForm(),
         title="Clips",
-        clips=Clip.get_all_clips(),
+        clips=RenderedClip.get_all_rendered_clips(),
     )
 
 
