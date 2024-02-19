@@ -4,6 +4,7 @@ from datetime import timedelta
 from clipplex.utils.timing import timestamp_str_of
 from clipplex.config import PLEX_TOKEN, PLEX_URL, PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH
 from pathlib import Path
+from pprint import pformat
 import xml.etree.ElementTree as ET
 import logging
 import os
@@ -154,7 +155,7 @@ class ActivePlexInfo(PlexInfo):
         ]
         if not plex_dirpath_ancestors:
             raise ValueError(
-                f"The given plex_filepath ({plex_filepath}) does not have an associated mapping in PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH."
+                f"The given plex_filepath ({plex_filepath}) does not have an associated mapping in PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH: {pformat(PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH)}"
             )
         most_specific_plex_dir = Path(os.path.commonpath(plex_dirpath_ancestors))
 
