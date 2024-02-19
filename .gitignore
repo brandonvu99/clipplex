@@ -50,3 +50,5 @@ coverage.xml
 docs/_build/
 sessions_example.xml
 test.py
+
+clipplex/static/generated_media

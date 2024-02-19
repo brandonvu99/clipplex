@@ -1,7 +1,7 @@
 from pathlib import Path
 import os
 
-GENERATED_MEDIA_DIRPATH: Path = Path("../generated_media")
+GENERATED_MEDIA_DIRPATH: Path = Path("./clipplex/static/generated_media")
 IMAGES_DIRPATH: Path = GENERATED_MEDIA_DIRPATH / "images"
 CLIPS_DIRPATH: Path = GENERATED_MEDIA_DIRPATH / "clips"
 IMAGES_DIRPATH.mkdir(parents=True, exist_ok=True)

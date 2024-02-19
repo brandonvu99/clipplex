@@ -1,13 +1,12 @@
 from __future__ import annotations
-from datetime import timedelta, datetime
 from clipplex.config import CLIPS_DIRPATH
 from clipplex.models.plex import ActivePlexInfo
 from clipplex.utils.timing import timestamp_str_of
+from datetime import timedelta, datetime
 from pathlib import Path
 import ffmpeg
 import logging
 import os
-import time
 
 
 class Clip:
@@ -100,7 +99,7 @@ class RenderedClip(object):
     def from_filepath(filepath: Path) -> RenderedClip:
         metadata = ffmpeg.probe(filepath)["format"]["tags"]
         return RenderedClip(
-            filepath=filepath,
+            filepath=RenderedClip.to_flask_static_path(filepath),
             title=metadata.get("title") or "",
             show=metadata.get("show") or "",
             season=metadata.get("season") or "",
@@ -108,3 +107,7 @@ class RenderedClip(object):
             episode_timestamp=metadata.get("episode_timestamp") or "",
             creator=metadata.get("creator") or "",
         )
+
+    @staticmethod
+    def to_flask_static_path(path: Path) -> Path:
+        return path.relative_to("./clipplex")

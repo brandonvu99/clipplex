@@ -1,17 +1,16 @@
 from clipplex.forms import ClipForm
-from clipplex.models.plex import PlexInfo, InactivePlexInfo, ActivePlexInfo
-from clipplex.models.snapshot import Snapshot
 from clipplex.models.clip import Clip, RenderedClip
 from clipplex.models.image import Image
+from clipplex.models.plex import PlexInfo
+from clipplex.models.snapshot import Snapshot
 from clipplex.utils.files import delete_file
 from clipplex.utils.streamable import streamable_upload
 from clipplex.utils.timing import add_time
 from datetime import timedelta
 from flask import Flask
 from flask import render_template, redirect, request, jsonify
-from pathlib import Path
+from pprint import pformat
 import logging
-import time
 
 flaskapp = Flask(__name__, static_url_path="/static")
 flaskapp.config["SECRET_KEY"] = "524t098wruigofjvncx98uwroeiyhfjdk"
@@ -24,11 +23,14 @@ def render_home():
 
 @flaskapp.route("/clip.html", methods=["GET"])
 def render_clip():
+    rendered_clips = RenderedClip.get_all_rendered_clips()
+    rendered_clip_filepaths = [clip['filepath'] for clip in rendered_clips]
+    logging.info(f"Serving clips from the following filepaths: {pformat(rendered_clip_filepaths)}")
     return render_template(
         "clip.html",
         form=ClipForm(),
         title="Clips",
-        clips=RenderedClip.get_all_rendered_clips(),
+        clips=rendered_clips,
     )
 
 
