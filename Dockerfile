@@ -26,4 +26,4 @@ WORKDIR /app
 RUN pip install -r requirements.txt
 RUN set FLASK_APP=main.py
 
-CMD flask run --host 0.0.0.0
+CMD flask --app main run --host 0.0.0.0
