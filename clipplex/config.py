@@ -29,8 +29,8 @@ PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH: dict[Path, Path] = {
         "PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH"
     ].items()
 }
-ROOT_MEDIA_DIRPATH: Path = PurePath(
-    PureWindowsPath(config["ROOT_MEDIA_DIRPATH"]).as_posix()
+GENERATED_MEDIA_DIRPATH: Path = PurePath(
+    PureWindowsPath(config["GENERATED_MEDIA_DIRPATH"]).as_posix()
 )
 
 PLEX_TOKEN = os.environ.get("PLEX_TOKEN")
