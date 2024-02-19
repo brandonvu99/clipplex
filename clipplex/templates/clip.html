@@ -102,7 +102,7 @@
 
 <table>
   {% for clip in clips %}
-    {% set file_path = clip['file_path'] %}
+    {% set filepath = clip['filepath'] %}
     {% set title = clip['title'] %}
     {% set show = clip['show'] %}
     {% set season = clip['season_number'] %}
@@ -112,13 +112,13 @@
       <tr>
         <td style="padding-right: 10px;">
           <video width="768" height="432" controls>
-            <source src="{{file_path}}" type="video/mp4" />
+            <source src="{{filepath}}" type="video/mp4" />
           </video>
         </td>
         <td>
-          <a href="{{file_path}}" download=""><i class="fas fa-download iconColumn" style="font-size: 50px;"></i></a><br><br>
-          <button type='button' class="fas fa-trash-alt" onclick='remove_file("{{file_path}}")' class="iconColumn" style="font-size: 50px; color: red;"></button><br><br>
-          <img src="static/icons/streamable.png" height="50px" onclick='upload_streamable("{{file_path}}")' width="75px" class="iconColumn"><br><br>
+          <a href="{{filepath}}" download=""><i class="fas fa-download iconColumn" style="font-size: 50px;"></i></a><br><br>
+          <button type='button' class="fas fa-trash-alt" onclick='remove_file("{{filepath}}")' class="iconColumn" style="font-size: 50px; color: red;"></button><br><br>
+          <img src="static/icons/streamable.png" height="50px" onclick='upload_streamable("{{filepath}}")' width="75px" class="iconColumn"><br><br>
           <img src="static/icons/imgur.png" height="50px" width="90px" class="iconColumn"><br>
         </td>
       </tr>
@@ -205,9 +205,9 @@
     document.getElementById("end_minute").value = "";
     document.getElementById("end_second").value = "";
   }
-  function upload_streamable(file){
+  function upload_streamable(filepath){
     const Http = new XMLHttpRequest();
-    const url='/api/streamable?file_path='+file;
+    const url='/api/streamable?filepath='+filepath;
     Http.open("POST", url, true);
     $('#layoutSidenav').css({'filter': 'blur(8px)', '-webkit-filter': 'blur(8px)'})
     $('body').append('<div style="" id="loadingDiv"><div class="loader"></div><div class="loaderSecondLine">Uploading clip...</div></div>');
@@ -228,9 +228,9 @@
     };
     Http.send();
   }
-  function remove_file(file){
+  function remove_file(filepath){
     const Http = new XMLHttpRequest();
-    const url='/api/clips?file_path='+file;
+    const url='/api/clips?filepath='+filepath;
     Http.open("DELETE", url);
     Http.send();
     location.reload();

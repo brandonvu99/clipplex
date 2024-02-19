@@ -73,7 +73,7 @@ def generate_clip(username: str, start_time: timedelta, end_time: timedelta):
 @flaskapp.route("/api/clips", methods=["DELETE"])
 # @login_required
 def clip_delete():
-    clip_path = request.args.get("file_path")
+    clip_path = request.args.get("filepath")
     if delete_file(clip_path):
         return redirect("/clip.html")
     else:
@@ -126,6 +126,6 @@ def plex_user_login():
 
 @flaskapp.route("/api/streamable", methods=["POST"])
 def streamable_upload():
-    file_path = request.args.get("file_path")
-    upload = streamable_upload(file_path)
+    filepath = request.args.get("filepath")
+    upload = streamable_upload(filepath)
     return upload
