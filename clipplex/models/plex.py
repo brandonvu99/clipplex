@@ -95,16 +95,15 @@ class ActivePlexInfo(PlexInfo):
 
         for media in plex.library.sectionByID(self.session.librarySectionID).all():
             if self.media_type == "episode":
+                show: Show = media
                 if self.session.grandparentGuid == show.guid:
-                    show: Show = media
                     season = show.season(title=self.session.parentTitle)
                     episode = season.episode(title=self.session.title)
 
                     return Path(episode.locations[0])
             elif self.media_type == "movie":
-                if self.session.guid == media.guid:
-                    movie: Movie = media
-
+                movie: Movie = media
+                if self.session.guid == movie.guid:
                     return Path(movie.locations[0])
 
         raise ValueError(
