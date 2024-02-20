@@ -66,15 +66,18 @@ class ActivePlexInfo(PlexInfo):
             self.show_name = self.session.grandparentTitle
             self.season = self.session.parentTitle
             self.episode_number = self.session.index
+            self.episode_or_movie_title = self.session.title
+            self.media_title = f"{self.show_name} - {self.season} - Episode {self.episode_number} - {self.episode_or_movie_title}"
         elif self.media_type == "movie":
             self.show_name = ""
             self.season = ""
             self.episode_number = ""
+            self.episode_or_movie_title = self.session.title
+            self.media_title = self.episode_or_movie_title
         else:
             raise ValueError(f"Unsupported media_type: {self.media_type}")
 
         self.media_path: Path = self._get_translated_filepath()
-        self.media_title = self._get_file_title()
         self.current_media_time_str = timestamp_str_of(
             timedelta(milliseconds=self.session.viewOffset)
         )
@@ -117,21 +120,6 @@ class ActivePlexInfo(PlexInfo):
             plex_filepath
         )
         return clipplex_filepath
-
-    def _get_file_title(self) -> str:
-        """Get the title of the video currently played by the user.
-
-        Returns:
-            str: If TV show, returns show + episode name, if movie, returns movie name.
-        """
-        if self.media_type == "episode":
-            show_name = self.session.grandparentTitle
-            title = self.session.title
-            return f"{show_name} - {title}"
-        elif self.media_type == "movie":
-            return self.session.title
-
-        raise ValueError(f"Unsupported media_type: {self.media_type}")
 
     @staticmethod
     def plex_filepath_to_clipplex_filepath(plex_filepath: Path) -> Path:

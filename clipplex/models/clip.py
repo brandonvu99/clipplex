@@ -14,15 +14,17 @@ class Clip:
         self, plex_info: ActivePlexInfo, start_time: timedelta, end_time: timedelta
     ):
         self.media_path = plex_info.media_path
-        self.start_time = start_time
-        self.end_time = end_time
+        self.start_timestamp = timestamp_str_of(self.start_time)
+        self.end_timestamp = timestamp_str_of(self.end_time)
+        self.duration_timestamp = timestamp_str_of(end_time - start_time)
 
         self.metadata = {
             "title": plex_info.media_title,
             "show": plex_info.show_name,
             "season": plex_info.season,
             "episode": plex_info.episode_number,
-            "episode_timestamp": plex_info.current_media_time_str,
+            "episode_start_timestamp": self.start_timestamp,
+            "episode_end_timestamp": self.end_timestamp,
             "creator": plex_info.username,
         }
 
@@ -35,16 +37,13 @@ class Clip:
             / f"{datetime.now().strftime(r'%Y-%m-%dT%H-%M-%S.%f')} - {self.metadata['creator']}{media_file_extension}"
         )
 
-    def create_clip(self):
-        start_timestamp = timestamp_str_of(self.start_time)
-        end_timestamp = timestamp_str_of(self.end_time)
-        duration_timestamp = timestamp_str_of(self.end_time - self.start_time)
+    def create_clip(self):        
         logging.info(
-            f"From file ({self.media_path}, {start_timestamp} - {end_timestamp} [{duration_timestamp}]), creating clip to file ({self.save_filepath})."
+            f"From file ({self.media_path}, {self.start_timestamp} - {self.end_timestamp} [{self.duration_timestamp}]), creating clip to file ({self.save_filepath})."
         )
         self.save_filepath.parent.mkdir(parents=True, exist_ok=True)
         (
-            ffmpeg.input(self.media_path, ss=start_timestamp, to=end_timestamp)
+            ffmpeg.input(self.media_path, ss=self.start_timestamp, to=self.end_timestamp)
             .output(
                 str(self.save_filepath),
                 vcodec="copy",
@@ -55,10 +54,13 @@ class Clip:
                     "metadata:g:1": "show={show}".format(**self.metadata),
                     "metadata:g:2": "season={season}".format(**self.metadata),
                     "metadata:g:3": "episode={episode}".format(**self.metadata),
-                    "metadata:g:4": "episode_timestamp={episode_timestamp}".format(
+                    "metadata:g:4": "episode_start_timestamp={episode_start_timestamp}".format(
                         **self.metadata
                     ),
-                    "metadata:g:5": "creator={creator}".format(**self.metadata),
+                    "metadata:g:5": "episode_end_timestamp={episode_end_timestamp}".format(
+                        **self.metadata
+                    ),
+                    "metadata:g:6": "creator={creator}".format(**self.metadata),
                 },
             )
             .run(capture_stdout=True)
@@ -105,7 +107,8 @@ class RenderedClip(object):
             show=metadata.get("show") or "",
             season=metadata.get("season") or "",
             episode=metadata.get("episode") or "",
-            episode_timestamp=metadata.get("episode_timestamp") or "",
+            episode_start_timestamp=metadata.get("episode_start_timestamp") or "",
+            episode_end_timestamp=metadata.get("episode_end_timestamp") or "",
             creator=metadata.get("creator") or "",
         )
 
