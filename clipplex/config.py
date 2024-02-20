@@ -10,7 +10,7 @@ CLIPS_DIRPATH.mkdir(parents=True, exist_ok=True)
 
 CONFIG_DEFAULT: dict = {
     "PLEX_DIRPATH_TO_CLIPPLEX_DIRPATH": {},
-    "ROOT_MEDIA_DIRPATH": "",
+    "GENERATED_MEDIA_DIRPATH": "",
 }
 CONFIG_DIRPATH: Path = Path("./config/")
 CONFIG_DIRPATH.mkdir(parents=True, exist_ok=True)
