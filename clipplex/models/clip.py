@@ -13,9 +13,10 @@ class Clip:
     def __init__(
         self, plex_info: ActivePlexInfo, start_time: timedelta, end_time: timedelta
     ):
+        self.create_timestamp = datetime.now().strftime(r"%Y-%m-%dT%H-%M-%S.%f%z")
         self.media_path = plex_info.media_path
-        self.start_timestamp = timestamp_str_of(self.start_time)
-        self.end_timestamp = timestamp_str_of(self.end_time)
+        self.start_timestamp = timestamp_str_of(start_time)
+        self.end_timestamp = timestamp_str_of(end_time)
         self.duration_timestamp = timestamp_str_of(end_time - start_time)
 
         self.metadata = {
@@ -25,16 +26,17 @@ class Clip:
             "episode": plex_info.episode_number,
             "episode_start_timestamp": self.start_timestamp,
             "episode_end_timestamp": self.end_timestamp,
+            "create_timestamp": self.create_timestamp,
             "creator": plex_info.username,
         }
 
         # TODO(somehow make this dynamic enough to handle output path without needing configuration from user)
         media_filepath_relative = self.media_path.relative_to(GENERATED_MEDIA_DIRPATH)
-        media_file_extension = self.media_path.suffix
+        # TODO(using the original extension available as self.media_path.suffix will make mkv files whose duration is from [start_timestamp, end_of_file] instead of [start_timestamp, end_timestamp], but the playable content is only from [start_timestamp, end_timestamp]. using mp4 for now.)
         self.save_filepath = (
             CLIPS_DIRPATH
             / media_filepath_relative
-            / f"{datetime.now().strftime(r'%Y-%m-%dT%H-%M-%S.%f')} - {self.metadata['creator']}{media_file_extension}"
+            / f"{datetime.now().strftime(r'%Y-%m-%dT%H-%M-%S.%f')} - {self.metadata['creator']}.mp4"
         )
 
     def create_clip(self):        
@@ -60,7 +62,10 @@ class Clip:
                     "metadata:g:5": "episode_end_timestamp={episode_end_timestamp}".format(
                         **self.metadata
                     ),
-                    "metadata:g:6": "creator={creator}".format(**self.metadata),
+                    "metadata:g:6": "create_timestamp={create_timestamp}".format(
+                        **self.metadata
+                    ),
+                    "metadata:g:7": "creator={creator}".format(**self.metadata),
                 },
             )
             .run(capture_stdout=True)
@@ -76,15 +81,19 @@ class RenderedClip(object):
         show: str,
         season: int,
         episode: int,
-        episode_timestamp: str,
+        episode_start_timestamp: str,
+        episode_end_timestamp: str,
+        create_timestamp: str,
         creator: str,
     ) -> None:
         self.filepath = filepath
         self.title = title
         self.show = show
         self.season_number = season
-        self.episode_number = episode
-        self.original_start_time = episode_timestamp
+        self.episode = episode
+        self.episode_start_timestamp = episode_start_timestamp
+        self.episode_end_timestamp = episode_end_timestamp
+        self.create_timestamp = create_timestamp
         self.creator = creator
 
     def to_dict(self) -> dict[str, str]:
@@ -109,6 +118,7 @@ class RenderedClip(object):
             episode=metadata.get("episode") or "",
             episode_start_timestamp=metadata.get("episode_start_timestamp") or "",
             episode_end_timestamp=metadata.get("episode_end_timestamp") or "",
+            create_timestamp=metadata.get("create_timestamp") or "",
             creator=metadata.get("creator") or "",
         )
 

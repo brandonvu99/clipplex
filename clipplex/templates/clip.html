@@ -107,8 +107,10 @@
   {% set title = clip['title'] %}
   {% set show = clip['show'] %}
   {% set season = clip['season_number'] %}
-  {% set episode = clip['episode_number'] %}
-  {% set original_time = clip['original_start_time'] %}
+  {% set episode = clip['episode'] %}
+  {% set episode_start_timestamp = clip['episode_start_timestamp'] %}
+  {% set episode_end_timestamp = clip['episode_end_timestamp'] %}
+  {% set create_timestamp = clip['create_timestamp'] %}
   {% set creator = clip['creator'] %}
   <tr>
     <td style="padding-right: 10px;">
@@ -129,17 +131,20 @@
     <td>
       {% if show|length %}
       <p>
+        <b>Title: </b>{{title}}<br>
         <b>Show: </b>{{show}}<br>
-        <b>Episode Name: </b>{{title}}<br>
-        <b>Season/Episode: </b>S{{season}}E{{episode}}<br>
-        <b>Time taken: </b>{{original_time}}<br>
-        <b>Created By: </b>{{creator}}<br>
+        <b>Season: </b>{{season}}<br>
+        <b>Episode: </b>{{episode}}<br>
+        <b>Start Timestamp: </b>{{episode_start_timestamp}}<br>
+        <b>End Timestamp: </b>{{episode_end_timestamp}}<br>
+        <b>Created at: </b>{{create_timestamp}}<br>
+        <b>Created by: </b>{{creator}}<br>
       </p>
       {% else %}
       <p>
         <b>Movie: </b>{{title}}<br>
-        <b>Time taken: </b>{{original_time}}<br>
-        <b>Created By: </b>{{creator}}<br>
+        <b>Created at: </b>{{create_timestamp}}<br>
+        <b>Created by: </b>{{creator}}<br>
       </p>
       {% endif %}
     </td>
