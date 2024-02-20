@@ -4,6 +4,7 @@ from clipplex.models.plex import ActivePlexInfo
 from clipplex.utils.timing import timestamp_str_of
 from datetime import timedelta, datetime
 from pathlib import Path
+from pprint import pformat
 import ffmpeg
 import logging
 import os
@@ -49,8 +50,9 @@ class Clip:
             .output(
                 str(self.save_filepath),
                 vcodec="copy",
-                acodec="copy",
+                # TODO(Strips all metadata?)
                 map_metadata=-1,
+                movflags="use_metadata_tags",
                 **{
                     "metadata:g:0": "title={title}".format(**self.metadata),
                     "metadata:g:1": "show={show}".format(**self.metadata),
@@ -89,7 +91,7 @@ class RenderedClip(object):
         self.filepath = filepath
         self.title = title
         self.show = show
-        self.season_number = season
+        self.season = season
         self.episode = episode
         self.episode_start_timestamp = episode_start_timestamp
         self.episode_end_timestamp = episode_end_timestamp
@@ -110,6 +112,7 @@ class RenderedClip(object):
     @staticmethod
     def from_filepath(filepath: Path) -> RenderedClip:
         metadata = ffmpeg.probe(filepath)["format"]["tags"]
+        logging.info(f"All available metadata for {filepath}: {pformat(metadata)}")
         return RenderedClip(
             filepath=RenderedClip.to_flask_static_path(filepath),
             title=metadata.get("title") or "",
